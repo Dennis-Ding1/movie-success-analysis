@@ -1,7 +1,7 @@
 ---
 title: "Analyzing Movie Success: The Impact of Credits, Revenue, and Audience Perception"
 author: "Haochen Ding"
-subtitle: "https://github.com/Dennis-Ding1/movie-success-analysis/tree/main/Midterm"
+subtitle: "https://github.com/Dennis-Ding1/movie-success-analysis/tree/main/Final"
 output:
   
   pdf_document: 
