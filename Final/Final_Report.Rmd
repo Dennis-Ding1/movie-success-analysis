@@ -1,0 +1,786 @@
+---
+title: "Analyzing Movie Success: The Impact of Credits, Revenue, and Audience Perception"
+author: "Haochen Ding"
+subtitle: "https://github.com/Dennis-Ding1/movie-success-analysis/tree/main/Midterm"
+output:
+  
+  pdf_document: 
+    fig_caption: true
+  html_document: default
+---
+\newpage
+
+
+```{r include=FALSE}
+library(httr)
+library(jsonlite)
+library(dplyr)
+library(tidyverse)
+library(tidytext)
+library(ggplot2)
+library(knitr)
+library(kableExtra)
+library(car) 
+library(MASS)
+library(lubridate)
+library(randomForest)
+library(gridExtra)
+library(broom)
+library(tm)
+library(textdata)
+library(ggcorrplot)
+library(patchwork)
+```
+
+```{r, eval=FALSE, include=FALSE}
+API_KEY <- "hide for kniting"
+BASE_URL <- "https://api.themoviedb.org/3/"
+```
+
+```{r eval=FALSE, include=FALSE}
+# Functions to get data from API
+
+get_toprated_movies <- function(pages) {
+  all_movies <- list()
+  
+  for (page in 1:pages) {
+    url <- paste0(BASE_URL, "movie/top_rated?api_key=", API_KEY, "&page=", page)
+    response <- GET(url)
+    data <- fromJSON(content(response, "text", encoding = "UTF-8"))
+    
+    if (!is.null(data$results)) {
+      all_movies <- append(all_movies, list(data$results))
+    }
+  }
+  
+  movies_df <- bind_rows(all_movies)
+  return(movies_df)
+}
+
+
+get_movie_genres <- function() {
+  genres <- list()
+
+  url <- paste0(BASE_URL, "genre/movie/list?api_key=", API_KEY)
+  response <- GET(url)
+  data <- fromJSON(content(response, "text", encoding = "UTF-8"))
+  
+  genres <- append(genres, list(data$genres))
+  
+  result <- bind_rows(genres)
+  return(result)
+}
+
+
+get_movie_reviews <- function(movie_id) {
+  url <- paste0(BASE_URL, "movie/", movie_id, "/reviews?api_key=", API_KEY, "&page=1")
+  response <- GET(url)
+  data <- fromJSON(content(response, "text", encoding = "UTF-8"))
+  
+  if (is.null(data$results) || length(data$results) == 0) {
+    return(data.frame(movie_id = movie_id, content = NA, rating = NA, stringsAsFactors = FALSE))
+  }
+
+  reviews_df <- data.frame(
+    movie_id = movie_id,
+    content = sapply(data$results$content, function(x) ifelse(is.null(x), NA, x)),
+    rating = sapply(data$results$author_details$rating, function(x) ifelse(is.null(x), NA, x)),
+    stringsAsFactors = FALSE
+  )
+  
+  # Limit to 10 reviews (or fewer if less exist)
+  reviews_df <- head(reviews_df, 10)
+  rownames(reviews_df) <- NULL
+  
+  return(reviews_df)
+}
+```
+
+```{r eval=FALSE, include=FALSE}
+# Get top 2000 movies
+movies <- get_toprated_movies(100)
+movies <- movies %>%
+  mutate(across(where(is.list), ~ sapply(., function(x) paste(unlist(x), collapse = ", "))))
+
+write.csv(movies, "movies.csv", row.names = FALSE)
+```
+
+```{r eval=FALSE, include=FALSE}
+# Get movie genre name correponding to genre id
+
+movie_genres <- get_movie_genres()
+write.csv(movie_genres, "movie_genres.csv", row.names = FALSE)
+```
+
+```{r eval=FALSE, include=FALSE}
+# Get movie reviews
+
+movie_ids <- movies$id
+reviews <- do.call(rbind, lapply(movie_ids, get_movie_reviews))
+write.csv(reviews, "reviews.csv", row.names = FALSE)
+```
+
+```{r eval=FALSE, include=FALSE}
+# Extend data with data in IMDB
+
+movies_full <- movies %>%
+  left_join(movies_extra %>% select(id, revenue, budget, imdb_id, tagline, cast, director, imdb_rating, imdb_votes, production_companies, production_countries), by = "id")
+
+# Write the extended data in csv, save time for each time knitting since movies_extra is a huge dataset.
+write.csv(reviews, "movies_full.csv", row.names = FALSE)
+```
+
+
+```{r include=FALSE}
+# Read datas
+
+movies <- read.csv("data/movies.csv")
+movies <- movies %>%         
+  dplyr::select(genre_ids, id, original_language, original_title, overview, 
+         popularity, release_date, title, vote_average, vote_count)
+
+movie_genres <- read.csv("data/movie_genres.csv")
+
+reviews <- read.csv("data/reviews.csv")
+
+# movies_extra <- read.csv("data/movies_extra.csv")
+
+movies <- read.csv("data/movies_full.csv")
+
+```
+
+
+# 1. Introduction
+Understanding what drives a movie's success is a crucial question in the film industry. Factors such as genre, budget, cast, and audience perception play a significant role in determining a movie's box office performance. This study using data collected from The Movie Database (TMDB) API and Kaggle. Aims to explore the relationship between movie credits, box office revenue, and audience ratings and perception, incorporating both numerical and text-based analysis. Specifically: 
+
+**How do movie credits (e.g., genre, cast, production) influence box office revenue and audience perception?**
+
+To address this, I propose the following hypotheses:
+
+- Credits and Revenue: Larger casts and larger production scale contribute to higher box office earnings. Higher budgets generally lead to greater box office revenue, but the rate of increase diminishes as budgets grow, diminishing returns.
+
+- Audience Reviews and Perception: Sentiment expressed in audience reviews significantly differs across movie genres. And movies with larger casts or more production companies tend to receive more positively worded audience reviews.
+
+By integrating credit-based attributes, financial performance, and text analysis, this study aims to identify key factors driving a movie’s success in both revenue and audience reception.
+
+
+# 2. Method
+
+## 2.1 Data collection & Merging
+For this analysis, I used four datasets: three sourced from TMDB API and one from Kaggle. Since TMDB does not provide box office revenue data, and unlimited access to the IMDb API is not available, I opted to use an existing Kaggle dataset that contains revenue, budget, IMDb ratings, and additional metadata (https://www.kaggle.com/datasets/alanvourch/tmdb-movies-daily-updates/data).
+
+From TMDB api (https://api.themoviedb.org/), I collected:
+
+1. The top 2000 highest-TMDB-rated movies, with related movie credits.
+
+2. Genre IDs to genre names look up table. 
+
+3. Audience reviews (up to 10 per movie).
+
+Datasets were merged with kaggle dataset, using movie IDs from TMDB as link to perform left join (TMDB dataset as base), ensuring proper integration of financial, genre, and audience perception data. The final dataset includes 2000 obversations, and 26 variables:
+
+- Movie details: title, release date, original language, cast, genre etc.
+
+- Box office performance and budget.
+
+- Audience ratings (TMDB and IMDB).
+
+Audience reviews are in a separate dataset, this is for faster performance. It contains 5026 observations (reviews).
+
+
+## 2.2 Data cleaning
+To ensure data usability, I performed several preprocessing steps on the dataset. This included extracting relevant numerical features, handling missing values, and filtering unrealistic financial data.
+
+*1. Feature Engineering*
+  
+Some columns in the dataset contained comma-separated lists (e.g., production companies, cast, genres, and production countries). To make these attributes more analytically useful, I transformed them into numerical features representing the number of elements in each category:
+
+- num_production_companies: The number of production companies involved in each movie.
+
+- num_cast: The number of credited cast members.
+
+- num_genre: The number of genres assigned to a movie.
+
+- num_production_countries: The number of countries associated with production.
+
+- first_genre: The most significant genre of movies. This is for data model analysis, but will not be used in text analysis. Then I use genre id and name look up dataset to cover id to actual name of the genre.
+
+*2. Handling Missing and Unrealistic Values*
+
+To ensure meaningful analysis, I filtered out movies with missing or unrealistic financial data:
+
+- Movies with NA values in revenue or budget were removed, as these are essential for analyzing box office performance.
+
+- Movies with revenue or budget less than 100 were excluded, as such values are likely incomplete or inaccurate records.
+
+*2. Cleaning Audience Review Text*
+
+To prepare the audience review text for text analysis, I first removed entries with missing content. Each review was then lowercased, stripped of non-alphabetic characters (while retaining apostrophes), and cleaned of common English stopwords to reduce noise. Extra whitespace was trimmed, and reviews that became empty after cleaning were removed. This preprocessing ensured that the text data was standardized and ready for tokenization and sentiment scoring.
+
+
+## 2.3 Analyze methodology
+
+To explore the relationship between movie credits, box office revenue, and audience perception, I employ a combination of numerical modeling and text analysis. The study is structured into two key analytical components:
+
+*1. Analyzing the Influence of Movie Credits on Box Office Revenue*
+
+- Linear Regression: A multiple linear regression model is used to estimate the individual contributions of key factors, such as budget, cast size, production scale, and genre, to box office revenue. This model provides an interpretable framework to assess whether larger productions and higher budgets are associated with increased revenue. Additionally, the regression model helps evaluate the presence of diminishing returns.
+
+Random Forest: Because revenue-generation processes may involve complex, nonlinear relationships, a random forest model is used to capture patterns that linear models might miss. Random forests are ensemble models that build many decision trees and average their predictions to improve accuracy and reduce overfitting. This approach allows the model to detect non-linear dependencies (relationships that don't follow a straight-line pattern) and higher-order interactions (how multiple variables combine in complex ways). Additionally, random forests produce variable importance measures, which quantify how much each predictor contributes to the model’s accuracy. These measures help identify which movie credit features — such as budget, cast size, or genre — have the most substantial impact on box office revenue.
+
+*2. Model Diagnostics and Evaluation*
+
+- To ensure the validity of the linear regression model, I perform standard diagnostic checks including residual plots, Q-Q plots, and leverage plots. These diagnostics evaluate key assumptions of the model such as linearity (whether the relationship between predictors and the outcome is linear), homoscedasticity (constant variance of residuals), normality of residuals, and the absence of overly influential observations. The residuals vs. fitted plot is used to identify any non-linear trends or heteroskedasticity, while the Q-Q plot assesses whether the residuals are approximately normally distributed. The leverage plot, which incorporates Cook’s distance, helps identify high-leverage points that may disproportionately affect the model’s estimates. These diagnostic tools are essential for verifying model assumptions and ensuring that the regression outputs are reliable and interpretable.
+
+- The performance of the random forest model is evaluated using several metrics that capture both fit and prediction accuracy. These include the coefficient of determination (R2), which reflects the proportion of variance in revenue explained by the model, as well as mean absolute error (MAE) and root mean squared error (RMSE), which measure the average and squared differences between predicted and actual values, respectively. To interpret the contribution of individual predictors, I use two variable importance measures provided by the model: percentage increase in mean squared error (%IncMSE), which quantifies how much prediction error increases when a variable is excluded, and increase in node purity (IncNodePurity), which captures how useful a variable is for splitting the decision trees. In addition, I use partial dependence plots to visualize how each variable affects predicted revenue, holding other variables constant. These plots, generated using the pdp package in R, reveal the shape and direction of non-linear effects, offering intuitive insights into the marginal influence of each predictor on revenue outcomes.
+
+*3. Examining Audience Perception Through Text Analysis*
+
+- Word Frequency and TF-IDF Analysis: To explore how audience perception varies across film genres, I begin by analyzing the textual content of audience reviews through word frequency and TF-IDF (term frequency–inverse document frequency) analysis. Word frequency reveals the most commonly used terms in reviews for each genre, highlighting shared audience concerns or themes. TF-IDF, on the other hand, emphasizes words that are not just frequent but also distinctive to a particular genre by downweighting terms that appear across many genres. This method helps surface genre-specific vocabulary that reflects how audiences uniquely engage with different types of films, offering insight into the narrative elements, cultural references, or emotional tones that resonate most strongly in each category.
+
+- Sentiment Analysis and Modeling Integration: I apply sentiment analysis using the AFINN lexicon, which assigns numeric scores to words based on their emotional polarity, allowing each review to be quantified by its overall tone. These sentiment scores are aggregated at the movie level and compared across genres to examine whether certain film types elicit more positive or negative reactions. To assess whether sentiment carries predictive value, I incorporate average sentiment scores into the linear regression model and perform an ANOVA test to evaluate whether it significantly improves model fit. Sentiment is also added to the random forest model, where its impact is assessed through changes in prediction accuracy and variable importance. This modeling integration enables a quantitative assessment of whether audience emotion, as reflected in written reviews, contributes meaningfully to explaining variation in box office revenue.
+
+
+```{r include=FALSE}
+# Data cleaning
+
+movies <- movies %>%
+  rename(tmdb_rating = vote_average)
+
+movies <- movies %>%
+  mutate(
+    num_production_companies = str_count(production_companies, ", ") + 1,
+    num_cast = str_count(cast, ", ") + 1,
+    num_genre = str_count(genre_ids, ", ") + 1,
+    num_production_countries = str_count(production_countries, ", ") + 1,
+    first_genre = sapply(strsplit(as.character(genre_ids), ",\\s*"), `[`, 1)
+  )
+
+movies <- movies %>%
+  mutate(first_genre = as.integer(first_genre)) %>%
+  left_join(movie_genres, by = c("first_genre" = "id")) %>%
+  mutate(first_genre = name) %>%
+  dplyr::select(-name)
+```
+
+```{r include=FALSE}
+movies_cleaned_box <- movies %>%
+  filter(!is.na(revenue) & !is.na(budget) & revenue > 100 & budget > 100)
+```
+
+
+```{r include=FALSE}
+# clean review data
+reviews_clean <- reviews %>%
+  filter(!is.na(content))
+
+clean_text <- function(text) {
+  text <- tolower(text)                         # Lowercase
+  text <- gsub("[^a-z'\\s]", " ", text)         # Keep apostrophes (like in "don't")
+  text <- removeWords(text, stopwords("en"))   
+  text <- stripWhitespace(text)                 # Remove extra spaces
+  return(text)
+}
+
+reviews_clean <- reviews_clean %>%
+  mutate(review = map_chr(content, clean_text)) |> 
+  dplyr::select(review, movie_id)
+
+reviews_clean <- reviews_clean %>%
+  filter(str_trim(review) != "")
+
+```
+
+
+# 3. Results
+
+## 3.1 Data Summary
+
+```{r echo=FALSE}
+numeric_cols <- movies_cleaned_box %>% dplyr::select(tmdb_rating, vote_count, revenue, budget, imdb_rating, imdb_votes, num_production_companies, num_production_countries, num_cast, num_genre)
+
+summary_table <- data.frame(
+  Variable = colnames(numeric_cols),
+  Min = sapply(numeric_cols, min, na.rm = TRUE),
+  Max = sapply(numeric_cols, max, na.rm = TRUE),
+  Mean = sapply(numeric_cols, mean, na.rm = TRUE),
+  Variance = sapply(numeric_cols, var, na.rm = TRUE),
+  NA_Count = sapply(numeric_cols, function(x) sum(is.na(x)))
+) |> 
+  mutate(
+    Min = round(Min, 3),
+    Max = round(Max, 3),
+    Mean = round(Mean, 3),
+    Variance = round(Variance, 3),
+  )
+
+summary_table <- summary_table %>%
+  mutate(Variable = case_when(
+    Variable == "num_cast" ~ "Number of Casts",
+    Variable == "num_genre" ~ "Number of Genres",
+    Variable == "num_production_companies" ~ "Production Companies",
+    Variable == "num_production_countries" ~ "Production Countries",
+    Variable == "budget" ~ "Budget",
+    Variable == "revenue" ~ "Revenue",
+    Variable == "imdb_rating" ~ "IMDB Rating",
+    Variable == "imdb_votes" ~ "IMDB Votes",
+    Variable == "tmdb_rating" ~ "TMDB Rating",
+    Variable == "vote_count" ~ "TMDB Vote Count",
+    TRUE ~ as.character(Variable)  # keep everything else unchanged
+  ))
+
+
+
+summary_table %>%
+  mutate(across(where(is.numeric), ~ format(.x, digits = 3, scientific = FALSE))) %>%
+  kable("latex", caption = "Summary of Numerical Variables", row.names = FALSE) %>%
+  kable_styling(latex_options = c("hold_position", "striped", "condensed"), full_width = FALSE)
+```
+
+Table 1 shows some statistical summary of the numerical variables used in this research. After data cleaning, they are all in reasonable range.
+
+```{r echo=FALSE, fig.cap="Distribution of First Genre", fig.height=5, fig.width=8.5,  fig.align='center`', fig.pos='H'}
+genre_counts <- movies_cleaned_box %>%
+  count(first_genre, sort = TRUE)
+
+ggplot(genre_counts, aes(x = reorder(first_genre, -n), y = n)) +
+  geom_bar(stat = "identity", fill = "skyblue", color = "black") +
+  geom_text(aes(label = n), vjust = -0.5, size = 4) +
+  labs(title = "Distribution of First Genre", x = "Genre", y = "Count") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+Figure 1 shows that Drama is the most common genre (432), followed by Action and Comedy (125 each). Less frequent genres include History (11), War (14), and Music (14), indicating a dominance of drama films in the dataset.
+
+
+```{r echo=FALSE, fig.cap="Distribution of raw and log-transformed revenue", fig.height=3, fig.width=7.5,  fig.align='center', fig.pos='H'}
+p1 <- ggplot(movies_cleaned_box, aes(x = revenue)) +
+  geom_histogram(bins = 50, fill = "skyblue", alpha = 0.7) +
+  ggtitle("Distribution of Revenue (Box office)") +
+  theme_minimal()
+
+movies_cleaned_box$log_revenue <- log(movies_cleaned_box$revenue)
+
+# Histogram of revenue
+p2 <- ggplot(movies_cleaned_box, aes(x = log_revenue)) +
+  geom_histogram(bins = 50, fill = "skyblue", alpha = 0.7) +
+  ggtitle("Distribution of log-Revenue (Box office)") +
+  theme_minimal()
+
+grid.arrange(p1, p2, ncol = 2)
+```
+
+Figure 2 shows the raw revenue distribution is highly skewed, with a long tail of extremely high values, making it difficult to analyze relationships effectively and create valid linear model. Taking the log transformation of revenue reduces skewness, creating a more normal-like distribution. This transformation ensures regression model is meaningful.
+
+
+
+## 3.2 Linear Regression
+
+```{r include=FALSE}
+# Fit Multiple Regression Model
+model <- lm(log_revenue ~ budget + I(budget^2) + num_production_companies + num_cast +  num_production_countries + num_genre + tmdb_rating + imdb_rating + first_genre, data = movies_cleaned_box)
+
+```
+
+The multiple linear regression model examines the relationship between number of production companies / countries / genre / cast, budget, and IMDB / TMDB ratings on log-transformed box office revenue. The model explains 42.5% of the variance, with an adjusted R-squared of 0.413, indicating a moderate fit.
+
+```{r echo=FALSE, fig.cap="Residuals vs Fitted: This plot assesses linearity and homoscedasticity. The red dashed line at zero helps identify deviations from constant variance or non-linear trends.", fig.height=3, fig.width=6.5,  fig.align='center`', fig.pos='H'}
+# Extract residuals and fitted values
+diagnostic_data <- augment(model)
+
+# Residuals vs Fitted plot
+ggplot(diagnostic_data, aes(.fitted, .resid)) +
+  geom_point(alpha = 0.6) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Residuals vs Fitted", x = "Fitted Values", y = "Residuals") +
+  theme_minimal()
+```
+
+```{r echo=FALSE, fig.cap="Normal Q-Q Plot: This plot evaluates whether the residuals follow a normal distribution. Points deviating from the red line suggest potential non-normality.", fig.height=2, fig.width=6,  fig.align='center`', fig.pos='H'}
+# Q-Q Plot
+ggplot(diagnostic_data, aes(sample = .resid)) +
+  stat_qq(alpha = 0.6) +
+  stat_qq_line(color = "red") +
+  labs(title = "Normal Q-Q Plot", x = "Theoretical Quantiles", y = "Sample Quantiles") +
+  theme_minimal()
+```
+
+```{r echo=FALSE, fig.cap="Residuals vs Leverage: This plot highlights influential observations using leverage and standardized residuals. Point sizes reflect Cook’s distance, with larger points indicating higher influence.", fig.height=3, fig.width=6,  fig.align='center`', fig.pos='H'}
+influence_data <- diagnostic_data %>%
+  mutate(leverage = .hat, cooksd = .cooksd)
+
+ggplot(influence_data, aes(x = leverage, y = .std.resid)) +
+  geom_point(aes(size = cooksd), alpha = 0.6) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray") +
+  scale_size_continuous(name = "Cook's D", range = c(1, 6)) +
+  labs(title = "Residuals vs Leverage", x = "Leverage", y = "Standardized Residuals") +
+  theme_minimal()
+```
+Figure 3, the Residuals vs Fitted plot shows a generally random scatter around the horizontal line at zero, suggesting that the assumptions of linearity and homoscedasticity are reasonably met. However, some funneling on the left indicates potential mild heteroskedasticity in lower fitted values. Figure 4, the Q-Q plot reveals notable deviations from the theoretical line, particularly in the lower tail, indicating some departure from normality in the residuals. Figure 5, the Residuals vs Leverage plot highlights one high-leverage observation with a large Cook's distance, suggesting that a single point may exert undue influence on the model. Overall, while the model appears broadly valid, these diagnostics suggest cautious interpretation and the possible need for robustness checks or alternative modeling approaches.
+
+```{r echo=FALSE}
+reg_table <- tidy(model) %>%
+  dplyr::select(term, estimate, std.error, statistic, p.value) %>%
+  mutate(significance = ifelse(p.value < 0.001, "very significant", 
+                          ifelse(p.value < 0.01, "significant", "not significant"))) |> 
+  mutate(
+    estimate = round(estimate, 3),
+    std.error = round(std.error, 3),
+    statistic = round(statistic, 3),
+    p.value = round(p.value, 3),
+  )
+
+kable(reg_table, format = "latex", booktabs = TRUE, caption = "Regression Results") %>%
+  kable_styling(latex_options = c("hold_position", "striped", "condensed"), full_width = FALSE)
+```
+
+
+Table 2 shows coeffiecent and their p values of the model:
+
+*1. Budget and Diminishing Returns:*
+
+- Budget has a strong positive effect on revenue, confirming that higher budgets tend to generate higher box office returns.
+
+- Budget-squared is negative, indicating diminishing returns, meaning that after a certain point, increasing the budget leads to progressively smaller revenue gains.
+
+*2. Production and Cast Effects:*
+
+- Number of Production Companies has a positive impact, suggesting that films with multiple production companies tend to perform better.
+
+- Number of Cast Members has a small but significant positive effect, meaning larger casts contribute slightly to higher revenue.
+
+- Number of Production Countries is negatively correlated with revenue, implying that films with international co-productions may not always perform better financially.
+
+*3. Genre Influence:*
+
+The baseline genre is Action.
+
+- Thriller and War have significantly lower revenues than Action films, suggesting they may not perform as well at the box office. However, their limited presence in the dataset suggests this trend may be influenced by sample size rather than an inherent genre effect.
+
+- Other genres, such as Drama, Comedy, and Horror, do not show statistically significant differences from Action films.
+
+*4. Audience Ratings Impact:*
+
+- TMDB Rating and IMDB Rating both significant, and have a positive impact on revenue, indicating that higher audience ratings correlate with higher earnings.
+
+
+
+
+## 3.3 Random Forest
+
+A Random Forest model was trained to evaluate the factors influencing box office revenue based on budget, production details, audience ratings, and genre. The dataset was split into 80% training and 20% testing, and the model was trained with 100 trees.
+
+```{r include=FALSE}
+set.seed(370)
+train_index <- sample(1:nrow(movies_cleaned_box), 0.8 * nrow(movies_cleaned_box))
+train_data <- movies_cleaned_box[train_index,]
+test_data <- movies_cleaned_box[-train_index,]
+
+# Fit Random Forest Model
+rf_model <- randomForest(revenue ~ budget + num_production_companies + num_cast +  num_production_countries + num_genre + tmdb_rating + imdb_rating + first_genre,
+                         data=train_data, ntree=100, importance=TRUE)
+```
+
+```{r echo=FALSE}
+predictions <- predict(rf_model, test_data)
+mae <- mean(abs(predictions - test_data$revenue))
+rmse <- sqrt(mean((predictions - test_data$revenue)^2))
+r2 <- 1 - (sum((predictions - test_data$revenue)^2) / sum((test_data$revenue - mean(test_data$revenue))^2))
+
+performance_table <- data.frame(
+  Metric = c("Mean Absolute Error (MAE)", "Root Mean Squared Error (RMSE)", "R-Squared (R²)"),
+  Value = c(mae, rmse, r2)
+)
+
+kable(performance_table, format = "latex", booktabs = TRUE, caption = "Random Forest Model Performance") %>%
+  kable_styling(latex_options = c("hold_position", "striped", "condensed"), full_width = FALSE)
+```
+
+
+Table 3 shows the Random Forest model explains 61.8% of revenue variance, with an MAE of $91.3M and an RMSE of $185.5M. While budget, genre, and ratings are key predictors, the high RMSE suggests missing factors like marketing or franchise status, indicating room for improvement.
+
+```{r echo=FALSE}
+var_labels <- c(
+  num_cast = "Number of Casts",
+  num_genre = "Number of Genres",
+  num_production_companies = "Production Companies",
+  num_production_countries = "Production Countries",
+  budget = "Budget",
+  revenue = "Revenue",
+  imdb_rating = "IMDB Rating",
+  imdb_votes = "IMDB Votes",
+  tmdb_rating = "TMDB Rating",
+  vote_count = "TMDB Vote Count",
+  first_genre = "Main Genre"
+)
+
+importance_df <- as.data.frame(importance(rf_model)) %>%
+  tibble::rownames_to_column(var = "Feature") %>%
+  arrange(desc(`%IncMSE`))
+
+importance_display <- importance_df %>%
+  mutate(
+    Feature = ifelse(Feature %in% names(var_labels), var_labels[Feature], Feature),
+    "Percentage Increase in MSE" = round(`%IncMSE`, 2),
+    "Increase in Node Purity"= round(`IncNodePurity`, 2)
+  ) |> 
+  dplyr::select(Feature, `Percentage Increase in MSE`, `Increase in Node Purity`)
+
+kable(importance_display, format = "latex", booktabs = TRUE, caption = "Random Forest Feature Importance") %>%
+  kable_styling(latex_options = c("hold_position", "striped", "condensed"), full_width = FALSE)
+```
+
+
+```{r echo=FALSE, fig.cap="Feature Importance Plot", fig.height=3, fig.width=8.5,  fig.align='center', fig.pos='H'}
+# Ensure values are numeric
+importance_df$IncNodePurity <- as.numeric(importance_df$IncNodePurity)
+
+# Plot 1: %IncMSE
+plot_mse <- ggplot(importance_df, aes(x = reorder(Feature, `%IncMSE`), y = `%IncMSE`)) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  labs(x = NULL, y = "Percentage Increase in MSE") +
+  theme_minimal()
+
+# Plot 2: IncNodePurity
+plot_purity <- ggplot(importance_df, aes(x = reorder(Feature, IncNodePurity), y = IncNodePurity)) +
+  geom_col(fill = "darkorange") +
+  coord_flip() +
+  labs(x = NULL, y = "Increase in Node Purity") +
+  theme_minimal()
+
+plot_mse + plot_purity + 
+  plot_layout(ncol = 2) +
+  plot_annotation(title = "Random Forest Feature Importance")
+
+```
+
+The Table 4 and Figure 6 shows the key factors affecting revenue:
+
+- Budget is the most important predictor, with the highest Percentage Increase in MSE (20.75) and Node Purity Contribution, confirming that higher budgets lead to higher revenue.
+
+- First Genre (5.97% Increase in MSE) also plays a significant role, suggesting that genre type impacts revenue. However, this contrasts with the regression results, where most first_genre categories were statistically insignificant. This discrepancy suggests that genre does not have a strong independent effect on revenue but rather interacts with other factors like budget and cast size. Random Forest captures these nonlinear interactions, indicating that genre's influence is context-dependent, which may not be fully reflected in a linear model.
+
+- IMDB rating (4.67%) and TMDB rating (2.99%) influence revenue, indicating that higher audience scores correlate with better financial performance.
+
+- Production-related variables (e.g., number of production companies, number of cast members) contribute to revenue but are less impactful than budget and ratings.
+
+```{r echo=FALSE, fig.cap="Partial Dependence on Budget", fig.height=4.1, fig.width=7.5,  fig.align='center', fig.pos='H'}
+partialPlot(rf_model, movies_cleaned_box, budget)
+```
+
+Figure 7 shows how predicted revenue changes with budget, holding other variables constant. The relationship is initially steep, indicating that increasing budgets significantly boost revenue. However, the curve flattens at higher budgets, suggesting diminishing returns—beyond a certain point, additional spending yields smaller increases in revenue. This aligns with our regression findings, where the quadratic budget term was negative, confirming that while budget is a key driver of revenue, its impact is nonlinear.
+
+
+
+
+## 3.4 Text Frequency and TF-IDF anaylze
+
+```{r include=FALSE}
+custom_stopwords <- c("s", "t", "m", "ll", "ve", "re", "em", "d", "movie", "film", "films", "one", "two", "even", "just", "well", "also", "good", "will", "really", "sci", "fi", "can", "much", "oz", "ian")
+
+# word frequency
+reviews_genre <- reviews_clean %>%
+  inner_join(movies_cleaned_box, by = c("movie_id" = "id"))
+  
+word_counts <- reviews_genre %>%
+  unnest_tokens(word, review) %>%
+  filter(!word %in% custom_stopwords) %>%
+  count(first_genre, word, sort = TRUE)
+```
+
+```{r echo=FALSE, fig.cap="Top 10 Most Frequent Words by Genre", fig.height=9, fig.width=12,  fig.align='center', fig.pos='H'}
+word_counts %>%
+  group_by(first_genre) %>%
+  slice_max(n, n = 10) %>%
+  ungroup() %>%
+  mutate(word = reorder_within(word, n, first_genre)) %>%
+  ggplot(aes(n, word, fill = first_genre)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ first_genre, scales = "free_y") +
+  scale_y_reordered() +
+  labs(title = "Top 10 Most Frequent Words by Genre",
+       x = "Word Frequency",
+       y = NULL)
+```
+
+The analysis of word frequency across genres reveals that audience reviews often focus on broadly positive and emotional language, such as “story,” “like,” “great,” and “best,” regardless of genre. This consistency suggests that general storytelling quality and emotional engagement are common criteria in how audiences evaluate films. However, some genre-specific themes also emerge — for instance, words like “action” and “character” are more frequent in Action films, while “love” appears frequently in Romance. These results indicate that while audience language is often universally appreciative, frequent terms can also reflect genre-specific expectations or narrative structures.
+
+
+```{r echo=FALSE, fig.cap="Top 10 TF-IDF Words by Genre", fig.height=9, fig.width=12,  fig.align='center', fig.pos='H'}
+tfidf_words <- word_counts %>%
+  filter(n >= 5) |> 
+  bind_tf_idf(word, first_genre, n) %>%
+  arrange(desc(tf_idf))
+
+tfidf_words %>%
+  group_by(first_genre) %>%
+  slice_max(tf_idf, n = 10) %>%
+  ungroup() %>%
+  mutate(word = reorder_within(word, tf_idf, first_genre)) %>%
+  ggplot(aes(tf_idf, word, fill = first_genre)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ first_genre, scales = "free") +
+  scale_y_reordered() +
+  labs(title = "Top 10 TF-IDF Words by Genre",
+       x = "TF-IDF Score",
+       y = NULL)
+```
+
+TF-IDF analysis further sharpens these distinctions by highlighting words that are particularly characteristic of each genre’s reviews. Unlike word frequency, which favors common language, TF-IDF emphasizes uniqueness — uncovering terms like “zombie” and “supernatural” for Horror, “elvis” and “addiction” for Drama, and “clint” and “eastwood” for Westerns. Many of these words reference notable characters, actors, or themes, suggesting that audience perception is often tied to genre-defining films or tropes. Overall, the TF-IDF results demonstrate how linguistic patterns in reviews reflect the cultural and thematic signatures of each genre more precisely than raw frequency counts.
+
+
+## 3.6 Sentiment Analysis
+
+```{r include=FALSE}
+afinn_lex <- get_sentiments("afinn")
+
+# Tokenize and compute using afinn scores
+review_sentiment <- reviews_clean %>%
+  mutate(review_id = row_number()) %>%
+  unnest_tokens(word, review) %>%
+  inner_join(afinn_lex, by = "word") %>%
+  group_by(review_id, movie_id) %>%
+  summarise(sentiment_score = mean(value), .groups = "drop")
+
+# Then average per movie
+movie_sentiment <- review_sentiment %>%
+  group_by(movie_id) %>%
+  summarise(avg_sentiment = mean(sentiment_score), .groups = "drop")
+```
+
+```{r include=FALSE}
+# Join sentiment scores to the movie dataset
+movie_sentiment_full <- movie_sentiment %>%
+  inner_join(movies_cleaned_box, by = c("movie_id" = "id"))
+```
+
+```{r include=FALSE}
+movie_sentiment_full <- movie_sentiment_full %>% 
+  mutate(cast_bin = cut(num_cast, breaks = c(0, 10, 30, 100, Inf), labels = c("Small", "Medium", "Large", "Huge")), 
+         prod_bin = cut(num_production_companies, breaks = c(0, 1, 3, 6, Inf), labels = c("Few", "Moderate", "Many", "Massive")))
+```
+
+```{r echo=FALSE, fig.cap="Average Audience Sentiment by Genre", fig.height=3, fig.width=6,  fig.align='center', fig.pos='H'}
+
+movie_sentiment_full %>%
+  group_by(first_genre) %>%
+  summarise(mean_sentiment = mean(avg_sentiment, na.rm = TRUE), .groups = "drop") %>%
+  ggplot(aes(x = reorder(first_genre, mean_sentiment), y = mean_sentiment)) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  labs(
+    title = "Average Audience Sentiment by Genre",
+    x = "Genre",
+    y = "Average Sentiment"
+  ) +
+  theme_minimal()
+
+```
+
+The analysis of average sentiment scores by genre reveals clear variation in audience perception. Family, Comedy, and Animation films receive the most positive sentiment on average, suggesting a generally favorable emotional response. In contrast, genres like Crime, War, and Mystery tend to have lower sentiment scores, indicating more critical or emotionally neutral reviews. These patterns suggest that genre significantly shapes the emotional tone of audience feedback.
+
+To assess whether these sentiment patterns have predictive value beyond descriptive insight, I integrated the average sentiment scores into both the linear regression and random forest models.
+
+```{r include=FALSE}
+# Fit Multiple Regression Model 2
+model1 <- lm(log_revenue ~ budget + I(budget^2) + num_production_companies + num_cast +  num_production_countries + num_genre + tmdb_rating + imdb_rating + first_genre, data = movie_sentiment_full)
+model2 <- lm(log_revenue ~ budget + I(budget^2) + num_production_companies + num_cast +  num_production_countries + num_genre + tmdb_rating + imdb_rating + first_genre + avg_sentiment, data = movie_sentiment_full)
+```
+
+```{r echo=FALSE}
+# Run ANOVA
+anova_results <- anova(model1, model2)
+
+# Convert to data frame and relabel models
+anova_table <- as.data.frame(anova_results)
+anova_table <- tibble::rownames_to_column(anova_table, var = "Model")
+
+# Rename models
+anova_table$Model <- c("Without Sentiment", "With Sentiment")
+
+# Create table
+knitr::kable(
+  anova_table,
+  format = "latex",
+  digits = 4,
+  caption = "Comparison of Linear Models With and Without Sentiment Score",
+  col.names = c(
+    "Model",
+    "Residual DF",
+    "Residual RSS",
+    "DF",
+    "Sum of Squares",
+    "F Statistic",
+    "p-value"
+  )
+) %>%
+  kableExtra::kable_styling(
+    latex_options = c("hold_position", "striped", "condensed"),
+    full_width = FALSE
+  )
+
+```
+
+The ANOVA test yielded an F-statistic of 3.16 with a p-value of 0.0757. It shows that the improvement of adding sentiment score is not statistically significant at the conventional 0.05 threshold. This suggests that while sentiment may carry some explanatory value, its effect on predicting box office revenue is limited and should be interpreted with caution.
+
+```{r include=FALSE}
+set.seed(370)
+train_index <- sample(1:nrow(movie_sentiment_full), 0.8 * nrow(movie_sentiment_full))
+train_data <- movie_sentiment_full[train_index,]
+test_data <- movie_sentiment_full[-train_index,]
+
+# Fit Random Forest Model
+rf_model2 <- randomForest(revenue ~ budget + num_production_companies + num_cast +  num_production_countries + num_genre + tmdb_rating + imdb_rating + first_genre + avg_sentiment,
+                         data=train_data, ntree=100, importance=TRUE)
+```
+
+```{r echo=FALSE}
+predictions <- predict(rf_model2, test_data)
+mae <- mean(abs(predictions - test_data$revenue))
+rmse <- sqrt(mean((predictions - test_data$revenue)^2))
+r2 <- 1 - (sum((predictions - test_data$revenue)^2) / sum((test_data$revenue - mean(test_data$revenue))^2))
+
+performance_table <- data.frame(
+  Metric = c("Mean Absolute Error (MAE)", "Root Mean Squared Error (RMSE)", "R-Squared (R²)"),
+  Value = c(mae, rmse, r2)
+)
+
+kable(performance_table, format = "latex", booktabs = TRUE, caption = "Random Forest Model with average sentiment score Performance") %>%
+  kable_styling(latex_options = c("hold_position", "striped", "condensed"), full_width = FALSE)
+```
+
+Adding average sentiment to the random forest model resulted in a slight decline in performance, with MAE increasing from 91.29 million to 100.50 million and RMSE rising from 185.47 million to 201.71 million. The R-squared value remained virtually unchanged at approximately 0.618, indicating that sentiment did not enhance the model’s explanatory power. These results suggest that, while sentiment may reflect audience perception, it does not meaningfully improve the predictive accuracy of revenue outcomes in this setting.
+
+# 4. Conclusions and Summary 
+
+## 4.1 Key Findings
+
+- Budget is the most influential driver of revenue, as consistently shown in both linear regression and random forest models. However, its effect is nonlinear — the marginal returns on revenue diminish as budgets increase, emphasizing the importance of optimizing investment levels rather than simply maximizing them.
+
+- Audience ratings (IMDB and TMDB) positively correlate with box office revenue, indicating that critically appreciated films are more likely to perform well commercially. Still, the moderate strength of this association implies that critical acclaim is only one piece of the commercial success puzzle.
+
+- The role of genre is nuanced and context-dependent. Linear regression found few genres to be statistically significant predictors, likely due to imbalanced representation across categories. In contrast, random forest models suggest that genre exerts an indirect effect through interactions with other variables like budget and production scale. This highlights the importance of considering nonlinear relationships and interaction effects when modeling real-world phenomena.
+
+- Production and cast size matter, but less than budget or ratings. The number of production companies — likely tied to distribution and marketing capabilities — showed a stronger association with revenue than cast size. This suggests that behind-the-scenes production decisions may be more influential than star power alone.
+
+- Text analysis of audience reviews revealed genre-specific discourse patterns. High-frequency words and top TF-IDF terms aligned closely with genre-defining themes, character names, and iconic film elements. This supports the notion that audiences engage with movies through both emotional and thematic lenses, and these discussions reflect collective cultural associations tied to genre.
+
+- Sentiment analysis revealed emotional differences across genres, with Family, Comedy, and Animation films receiving more positive sentiment than darker genres like Crime, War, and Horror. However, incorporating average sentiment into predictive models did not significantly improve their performance. This suggests that while sentiment reflects audience response, it may not directly translate into financial impact — possibly due to lag effects, review bias, or redundancy with other features like ratings.
+
+## 4.2 Broader Implications
+
+These findings highlight that data-driven decision-making can play a key role in film production and marketing. Budget and production scale remain the most reliable predictors of box office success, underscoring the value of strategic resource allocation. Audience ratings also matter, but their impact is moderate, suggesting that critical acclaim supports — but does not guarantee — financial performance. While genre and sentiment reflect important aspects of audience engagement, their influence appears more complex and indirect, likely interacting with other production factors. Sentiment analysis, though not strongly predictive in this context, still provides valuable qualitative insights into how different genres resonate emotionally with viewers.
+
+## 4.3 Limitations
+
+This study has several limitations. The dataset likely reflects survivorship bias, excluding low-profile or unreleased films. Genre imbalance may reduce the reliability of genre-specific results. Additionally, the sentiment analysis was based on a simple lexicon (AFINN), which may miss contextual nuance. More advanced models or audience segmentation by region or platform could reveal deeper patterns. Lastly, the models assume fixed relationships, while real-world audience behavior may shift over time, suggesting that future work should explore temporal dynamics or social media-based signals.
+
+
+
+
+
+
+
+
+
