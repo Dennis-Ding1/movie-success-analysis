@@ -275,6 +275,7 @@ reviews_clean <- reviews %>%
   filter(!is.na(content))
 
 clean_text <- function(text) {
+  text <- iconv(text, from = "UTF-8", to = "UTF-8", sub = "")
   text <- tolower(text)                         # Lowercase
   text <- gsub("[^a-z'\\s]", " ", text)         # Keep apostrophes (like in "don't")
   text <- removeWords(text, stopwords("en"))   
@@ -653,12 +654,6 @@ movie_sentiment <- review_sentiment %>%
 # Join sentiment scores to the movie dataset
 movie_sentiment_full <- movie_sentiment %>%
   inner_join(movies_cleaned_box, by = c("movie_id" = "id"))
-```
-
-```{r include=FALSE}
-movie_sentiment_full <- movie_sentiment_full %>% 
-  mutate(cast_bin = cut(num_cast, breaks = c(0, 10, 30, 100, Inf), labels = c("Small", "Medium", "Large", "Huge")), 
-         prod_bin = cut(num_production_companies, breaks = c(0, 1, 3, 6, Inf), labels = c("Few", "Moderate", "Many", "Massive")))
 ```
 
 ```{r echo=FALSE, fig.cap="Average Audience Sentiment by Genre", fig.height=3, fig.width=6,  fig.align='center', fig.pos='H'}
