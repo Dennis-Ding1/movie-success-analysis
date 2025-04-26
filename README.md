@@ -18,8 +18,7 @@ We analyze structured data (budget, genre, ratings, etc.) alongside unstructured
 
 Interactive results and visualizations are hosted at:
 
-👉 **[Movie Success Analysis Website](https://your-username.github.io/your-repo-name/)**  
-*(Replace with your actual GitHub Pages link)*
+👉 **[Movie Success Analysis Website](https://dennis-ding1.github.io/movie-success-analysis/)**  
 
 ---
 
