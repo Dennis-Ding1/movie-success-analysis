@@ -9,7 +9,7 @@ We analyze structured data (budget, genre, ratings, etc.) alongside unstructured
 ## 📁 Project Structure
 
 - `Midterm/` – Contains the midterm version of the analysis with preliminary modeling and initial results.
-- `Final/` – Contains the final, full project including improved data cleaning, feature engineering, modeling, and visualizations.
+- `Final/` – Contains the final, full project including improved modeling, text analyzing and visualizations.
 - `docs/` – Website output built using R Markdown and for deployment via GitHub Pages.
 
 ---

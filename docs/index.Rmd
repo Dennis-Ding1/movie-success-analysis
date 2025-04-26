@@ -59,16 +59,15 @@ movies_cleaned_box <- movies %>%
 
 movies_cleaned_box$log_revenue <- log(movies_cleaned_box$revenue)
 
-# clean review data
 reviews_clean <- reviews %>%
   filter(!is.na(content))
 
 clean_text <- function(text) {
   text <- iconv(text, from = "UTF-8", to = "UTF-8", sub = "")
-  text <- tolower(text)                         # Lowercase
-  text <- gsub("[^a-z'\\s]", " ", text)         # Keep apostrophes (like in "don't")
+  text <- tolower(text)                
+  text <- gsub("[^a-z'\\s]", " ", text)        
   text <- removeWords(text, stopwords("en"))   
-  text <- stripWhitespace(text)                 # Remove extra spaces
+  text <- stripWhitespace(text)             
   return(text)
 }
 
@@ -83,7 +82,6 @@ reviews_clean <- reviews_clean %>%
 
 afinn_lex <- get_sentiments("afinn")
 
-# Tokenize and compute using afinn scores
 review_sentiment <- reviews_clean %>%
   mutate(review_id = row_number()) %>%
   unnest_tokens(word, review) %>%
@@ -91,7 +89,6 @@ review_sentiment <- reviews_clean %>%
   group_by(review_id, movie_id) %>%
   summarise(sentiment_score = mean(value), .groups = "drop")
 
-# Then average per movie
 movie_sentiment <- review_sentiment %>%
   group_by(movie_id) %>%
   summarise(avg_sentiment = mean(sentiment_score), .groups = "drop")
@@ -116,7 +113,6 @@ rf_model2 <- randomForest(revenue ~ budget + num_production_companies + num_cast
 
 custom_stopwords <- c("s", "t", "m", "ll", "ve", "re", "em", "d", "movie", "film", "films", "one", "two", "even", "just", "well", "also", "good", "will", "really", "sci", "fi", "can", "much", "oz", "ian")
 
-# word frequency
 reviews_genre <- reviews_clean %>%
   inner_join(movies_cleaned_box, by = c("movie_id" = "id"))
   
@@ -154,7 +150,6 @@ A toggle button above the plots allows you to switch between models that include
 library(plotly)
 library(dplyr)
 
-# === Helper to build baseline line ===
 max_val <- max(movie_sentiment_full$revenue, na.rm = TRUE)
 baseline_line <- list(
   type = "line",
@@ -163,7 +158,6 @@ baseline_line <- list(
   line = list(color = "gray", dash = "dash")
 )
 
-# === Helper function to generate a trace ===
 build_trace <- function(df, label, color, visible = TRUE) {
   list(
     x = df$actual,
@@ -178,7 +172,6 @@ build_trace <- function(df, label, color, visible = TRUE) {
   )
 }
 
-# === Data Prep ===
 lm_with <- movie_sentiment_full %>% mutate(actual = revenue, fitted = exp(model2$fitted.values))
 lm_without <- movie_sentiment_full %>% mutate(actual = revenue, fitted = exp(model1$fitted.values))
 rf_train_with <- train_data %>% mutate(actual = revenue, fitted = predict(rf_model2, newdata = train_data))
@@ -186,7 +179,6 @@ rf_train_without <- train_data %>% mutate(actual = revenue, fitted = predict(rf_
 rf_test_with <- test_data %>% mutate(actual = revenue, fitted = predict(rf_model2, newdata = test_data))
 rf_test_without <- test_data %>% mutate(actual = revenue, fitted = predict(rf_model1, newdata = test_data))
 
-# === Build traces ===
 lm_w  <- build_trace(lm_with, "Linear Regression", "#1f77b4")
 lm_wo <- build_trace(lm_without, "Linear Regression", "#1f77b4", FALSE)
 
@@ -196,7 +188,6 @@ rf_train_wo <- build_trace(rf_train_without, "Random Forest Train", "#2ca02c", F
 rf_test_w  <- build_trace(rf_test_with, "Random Forest Test", "#d62728")
 rf_test_wo <- build_trace(rf_test_without, "Random Forest Test", "#d62728", FALSE)
 
-# === Create subplots ===
 max_axis <- max(movie_sentiment_full$revenue, na.rm = TRUE)
 
 lm_plot <- plot_ly() %>%
@@ -232,7 +223,6 @@ rf_test_plot <- plot_ly() %>%
          xaxis = list(title = "Actual Revenue", range = c(0, max_axis)),
          yaxis = list(title = "Predicted Revenue", range = c(0, max_axis)))
 
-# === Combine plots ===
 full_plot <- subplot(lm_plot, rf_train_plot, rf_test_plot,
                      nrows = 1, shareY = TRUE, titleX = TRUE, titleY = TRUE) %>%
   layout(
@@ -278,12 +268,10 @@ Hover over each bar to view the exact word frequency or TF-IDF score. This compa
 library(dplyr)
 library(plotly)
 
-# === UI Parameters ===
 genres <- sort(unique(word_counts$first_genre))
 top_n <- 10
 genre_default <- "Action"
 
-# === Helper to create subplot for one genre ===
 generate_subplot <- function(genre) {
   freq_data <- word_counts %>%
     filter(first_genre == genre) %>%
@@ -341,7 +329,6 @@ generate_subplot <- function(genre) {
     )
 }
 
-# Pre-render all plots into hidden divs
 plots <- list()
 for (g in genres) {
   id <- paste0("plot_", g)
@@ -354,17 +341,14 @@ for (g in genres) {
 ```
 
 ```{r echo=FALSE, results='asis'}
-# Dropdown menu
 cat('<select id="genreDropdown" style="margin-bottom: 1em; font-size: 16px;">')
 for (g in genres) {
   cat(sprintf('<option value="%s">%s</option>', g, g))
 }
 cat('</select>')
 
-# Plot containers
 browsable(tagList(plots))
 
-# JS for switching
 cat('
 <script>
   document.getElementById("genreDropdown").addEventListener("change", function() {
@@ -394,13 +378,11 @@ This interactive visualization shows how movie genres differ in the emotions the
 Hover over each bar to see the exact average sentiment score by genre.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-# === Data Summary ===
 sentiment_summary <- movie_sentiment_full %>%
   group_by(first_genre) %>%
   summarise(mean_sentiment = mean(avg_sentiment, na.rm = TRUE), .groups = "drop") %>%
   arrange(mean_sentiment)  # ensures descending visual order after coord_flip
 
-# === Interactive Plot ===
 plot_ly(
   data = sentiment_summary,
   x = ~mean_sentiment,

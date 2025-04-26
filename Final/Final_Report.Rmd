@@ -309,10 +309,10 @@ summary_table <- data.frame(
   NA_Count = sapply(numeric_cols, function(x) sum(is.na(x)))
 ) |> 
   mutate(
-    Min = round(Min, 3),
-    Max = round(Max, 3),
-    Mean = round(Mean, 3),
-    Variance = round(Variance, 3),
+    Min = round(Min, 2),
+    Max = formatC(Max, format = "e", digits = 2),
+    Mean = formatC(Mean, format = "e", digits = 2),
+    Variance = formatC(Variance, format = "e", digits = 2),
   )
 
 summary_table <- summary_table %>%
@@ -385,6 +385,8 @@ model <- lm(log_revenue ~ budget + I(budget^2) + num_production_companies + num_
 
 The multiple linear regression model examines the relationship between number of production companies / countries / genre / cast, budget, and IMDB / TMDB ratings on log-transformed box office revenue. The model explains 42.5% of the variance, with an adjusted R-squared of 0.413, indicating a moderate fit.
 
+### 3.2.1 Model Diagnostic
+
 ```{r echo=FALSE, fig.cap="Residuals vs Fitted: This plot assesses linearity and homoscedasticity. The red dashed line at zero helps identify deviations from constant variance or non-linear trends.", fig.height=3, fig.width=6.5,  fig.align='center`', fig.pos='H'}
 # Extract residuals and fitted values
 diagnostic_data <- augment(model)
@@ -425,8 +427,8 @@ reg_table <- tidy(model) %>%
   mutate(significance = ifelse(p.value < 0.001, "very significant", 
                           ifelse(p.value < 0.01, "significant", "not significant"))) |> 
   mutate(
-    estimate = round(estimate, 3),
-    std.error = round(std.error, 3),
+    estimate = formatC(estimate, format = "e", digits = 2),
+    std.error = formatC(std.error, format = "e", digits = 2),
     statistic = round(statistic, 3),
     p.value = round(p.value, 3),
   )
@@ -435,12 +437,13 @@ kable(reg_table, format = "latex", booktabs = TRUE, caption = "Regression Result
   kable_styling(latex_options = c("hold_position", "striped", "condensed"), full_width = FALSE)
 ```
 
+### 3.2.2 Model Coefficients
 
 Table 2 shows coeffiecent and their p values of the model:
 
 *1. Budget and Diminishing Returns:*
 
-- Budget has a strong positive effect on revenue, confirming that higher budgets tend to generate higher box office returns.
+- Budget has a strong positive effect on revenue, confirming that higher budgets tend to generate higher box office returns. Though the estimate coefficient for Budget is very small, but budget itself is  on a very large scale (around e08). So when interpreted at a realistic scale (e.g., per million dollars), an increase of $1 million in budget is associated with an approximate 4.2% increase in revenue, which is a meaningful and practically significant effect.
 
 - Budget-squared is negative, indicating diminishing returns, meaning that after a certain point, increasing the budget leads to progressively smaller revenue gains.
 
@@ -515,7 +518,7 @@ var_labels <- c(
   first_genre = "Main Genre"
 )
 
-importance_df <- as.data.frame(importance(rf_model)) %>%
+importance_df <- as.data.frame(importance(rf_model)) %>% 
   tibble::rownames_to_column(var = "Feature") %>%
   arrange(desc(`%IncMSE`))
 
@@ -644,14 +647,13 @@ review_sentiment <- reviews_clean %>%
   group_by(review_id, movie_id) %>%
   summarise(sentiment_score = mean(value), .groups = "drop")
 
-# Then average per movie
+# Average per movie
 movie_sentiment <- review_sentiment %>%
   group_by(movie_id) %>%
   summarise(avg_sentiment = mean(sentiment_score), .groups = "drop")
 ```
 
 ```{r include=FALSE}
-# Join sentiment scores to the movie dataset
 movie_sentiment_full <- movie_sentiment %>%
   inner_join(movies_cleaned_box, by = c("movie_id" = "id"))
 ```
@@ -684,17 +686,13 @@ model2 <- lm(log_revenue ~ budget + I(budget^2) + num_production_companies + num
 ```
 
 ```{r echo=FALSE}
-# Run ANOVA
 anova_results <- anova(model1, model2)
 
-# Convert to data frame and relabel models
 anova_table <- as.data.frame(anova_results)
 anova_table <- tibble::rownames_to_column(anova_table, var = "Model")
 
-# Rename models
 anova_table$Model <- c("Without Sentiment", "With Sentiment")
 
-# Create table
 knitr::kable(
   anova_table,
   format = "latex",
@@ -725,7 +723,6 @@ train_index <- sample(1:nrow(movie_sentiment_full), 0.8 * nrow(movie_sentiment_f
 train_data <- movie_sentiment_full[train_index,]
 test_data <- movie_sentiment_full[-train_index,]
 
-# Fit Random Forest Model
 rf_model2 <- randomForest(revenue ~ budget + num_production_companies + num_cast +  num_production_countries + num_genre + tmdb_rating + imdb_rating + first_genre + avg_sentiment,
                          data=train_data, ntree=100, importance=TRUE)
 ```
