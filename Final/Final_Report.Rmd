@@ -492,8 +492,10 @@ rmse <- sqrt(mean((predictions - test_data$revenue)^2))
 r2 <- 1 - (sum((predictions - test_data$revenue)^2) / sum((test_data$revenue - mean(test_data$revenue))^2))
 
 performance_table <- data.frame(
-  Metric = c("Mean Absolute Error (MAE)", "Root Mean Squared Error (RMSE)", "R-Squared (R²)"),
-  Value = c(mae, rmse, r2)
+  Metric = c("MAE", "RMSE", "R²"),
+  Value = c(formatC(mae, format = "e", digits = 2),
+            formatC(rmse, format = "e", digits = 2),
+            formatC(r2, format = "e", digits = 2))
 )
 
 kable(performance_table, format = "latex", booktabs = TRUE, caption = "Random Forest Model Performance") %>%
@@ -526,7 +528,7 @@ importance_display <- importance_df %>%
   mutate(
     Feature = ifelse(Feature %in% names(var_labels), var_labels[Feature], Feature),
     "Percentage Increase in MSE" = round(`%IncMSE`, 2),
-    "Increase in Node Purity"= round(`IncNodePurity`, 2)
+    "Increase in Node Purity"= formatC(IncNodePurity, format = "e", digits = 2),
   ) |> 
   dplyr::select(Feature, `Percentage Increase in MSE`, `Increase in Node Purity`)
 
@@ -734,8 +736,10 @@ rmse <- sqrt(mean((predictions - test_data$revenue)^2))
 r2 <- 1 - (sum((predictions - test_data$revenue)^2) / sum((test_data$revenue - mean(test_data$revenue))^2))
 
 performance_table <- data.frame(
-  Metric = c("Mean Absolute Error (MAE)", "Root Mean Squared Error (RMSE)", "R-Squared (R²)"),
-  Value = c(mae, rmse, r2)
+  Metric = c("MAE", "RMSE", "R²"),
+  Value = c(formatC(mae, format = "e", digits = 2),
+            formatC(rmse, format = "e", digits = 2),
+            formatC(r2, format = "e", digits = 2))
 )
 
 kable(performance_table, format = "latex", booktabs = TRUE, caption = "Random Forest Model with average sentiment score Performance") %>%
