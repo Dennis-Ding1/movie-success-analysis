@@ -538,18 +538,23 @@ kable(importance_display, format = "latex", booktabs = TRUE, caption = "Random F
 
 
 ```{r echo=FALSE, fig.cap="Feature Importance Plot", fig.height=3, fig.width=8.5,  fig.align='center', fig.pos='H'}
-# Ensure values are numeric
-importance_df$IncNodePurity <- as.numeric(importance_df$IncNodePurity)
+
+importance_plot <- importance_df %>%
+  mutate(
+    Feature = ifelse(Feature %in% names(var_labels), var_labels[Feature], Feature)
+  )
+
+importance_plot$IncNodePurity <- as.numeric(importance_plot$IncNodePurity)
 
 # Plot 1: %IncMSE
-plot_mse <- ggplot(importance_df, aes(x = reorder(Feature, `%IncMSE`), y = `%IncMSE`)) +
+plot_mse <- ggplot(importance_plot, aes(x = reorder(Feature, `%IncMSE`), y = `%IncMSE`)) +
   geom_col(fill = "steelblue") +
   coord_flip() +
   labs(x = NULL, y = "Percentage Increase in MSE") +
   theme_minimal()
 
 # Plot 2: IncNodePurity
-plot_purity <- ggplot(importance_df, aes(x = reorder(Feature, IncNodePurity), y = IncNodePurity)) +
+plot_purity <- ggplot(importance_plot, aes(x = reorder(Feature, IncNodePurity), y = IncNodePurity)) +
   geom_col(fill = "darkorange") +
   coord_flip() +
   labs(x = NULL, y = "Increase in Node Purity") +

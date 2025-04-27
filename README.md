@@ -16,7 +16,7 @@ We analyze structured data (budget, genre, ratings, etc.) alongside unstructured
 
 ## 🌐 Website
 
-Interactive results and visualizations are hosted at:
+Interactive website and visualizations are hosted at:
 
 👉 **[Movie Success Analysis Website](https://dennis-ding1.github.io/movie-success-analysis/)**  
 
