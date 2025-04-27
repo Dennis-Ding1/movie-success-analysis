@@ -27,7 +27,6 @@ Interactive website and visualizations are hosted at:
 
 🎥 **Watch the project walk-through here:**  
 [![Watch the Video](https://img.shields.io/badge/YouTube-Watch-red?logo=youtube)](https://youtu.be/gtZV-0I0rvI)  
-*(Replace with your actual video link)*
 
 ---
 
