@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>The Impact of Credits, Revenue, and Audience Perception</title>
+
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet" />
+<script src="site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<script src="site_libs/plotly-binding-4.10.4/plotly.js"></script>
+<script src="site_libs/typedarray-0.1/typedarray.min.js"></script>
+<link href="site_libs/crosstalk-1.2.1/css/crosstalk.min.css" rel="stylesheet" />
+<script src="site_libs/crosstalk-1.2.1/js/crosstalk.min.js"></script>
+<link href="site_libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="site_libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+<link rel="stylesheet" href="custom.css" type="text/css" />
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">🎬 Movie Success Analysis</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="models.html">Model Results</a>
+</li>
+<li>
+  <a href="text.html">Text Analysis</a>
+</li>
+<li>
+  <a href="https://github.com/Dennis-Ding1/movie-success-analysis/blob/main/Final/Final_Report.pdf">⬇ PDF Report</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">The Impact of Credits, Revenue, and
+Audience Perception</h1>
+<h3 class="subtitle">Top Words in Reviews</h3>
+
+</div>
+
+
+<div id="section" class="section level1 tabset">
+<h1 class="tabset"></h1>
+<div id="top-words" class="section level2">
+<h2>Top words</h2>
+<div id="top-words-in-reviews-by-genre" class="section level3">
+<h3>Top Words in Reviews by Genre</h3>
+<p>This interactive dual-panel visualization displays the top 10 words
+used in movie reviews across different genres. Use the dropdown menu to
+explore specific genres.</p>
+<ul>
+<li><p><strong>Left panel</strong> shows the most frequently used words
+in reviews for the selected genre.</p></li>
+<li><p><strong>Right panel</strong> highlights the top TF-IDF (Term
+Frequency–Inverse Document Frequency) words—terms that are uniquely
+representative of the genre.</p></li>
+</ul>
+<p>Hover over each bar to view the exact word frequency or TF-IDF score.
+This comparison helps reveal not only what audiences talk about most
+often, but also what language is most distinctive to each genre.</p>
+<p><select id="genreDropdown" style="margin-bottom: 1em; font-size: 16px;"><option value="Action">Action</option><option value="Adventure">Adventure</option><option value="Animation">Animation</option><option value="Comedy">Comedy</option><option value="Crime">Crime</option><option value="Drama">Drama</option><option value="Family">Family</option><option value="Fantasy">Fantasy</option><option value="History">History</option><option value="Horror">Horror</option><option value="Music">Music</option><option value="Mystery">Mystery</option><option value="Romance">Romance</option><option value="Science Fiction">Science
+Fiction</option><option value="Thriller">Thriller</option><option value="War">War</option><option value="Western">Western</option></select></p>
+<div id="plot_Action" style="">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-9e7b2982c785aae312b9" style="width:100%;height:400px;"></div>
+<script type="application/json" data-for="htmlwidget-9e7b2982c785aae312b9">{"x":{"data":[{"x":[601,430,409,343,294,292,252,248,240,239],"y":["action","like","story","time","great","first","man","best","movies","character"],"orientation":"h","text":["Word: action <br>Frequency: 601","Word: like <br>Frequency: 430","Word: story <br>Frequency: 409","Word: time <br>Frequency: 343","Word: great <br>Frequency: 294","Word: first <br>Frequency: 292","Word: man <br>Frequency: 252","Word: best <br>Frequency: 248","Word: movies <br>Frequency: 240","Word: character <br>Frequency: 239"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#1f77b4","line":{"color":"rgba(31,119,180,1)"}},"showlegend":false,"name":"Word Frequency","type":"bar","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0056409188076872408,0.0030573523561319912,0.0027900185596529061,0.0026389699045318627,0.0026062675822764512,0.0025469128148388909,0.0019620878038337252,0.0019045801562789452,0.0018104560972951151,0.0017752191019143344],"y":["wick","deadpool","marvel","x","wolverine","spider","franchise","terminator","batman","superhero"],"orientation":"h","text":["Word: wick <br>TF-IDF: 0.0056","Word: deadpool <br>TF-IDF: 0.0031","Word: marvel <br>TF-IDF: 0.0028","Word: x <br>TF-IDF: 0.0026","Word: wolverine <br>TF-IDF: 0.0026","Word: spider <br>TF-IDF: 0.0025","Word: franchise <br>TF-IDF: 0.002","Word: terminator <br>TF-IDF: 0.0019","Word: batman <br>TF-IDF: 0.0018","Word: superhero <br>TF-IDF: 0.0018"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#ff7f0e","line":{"color":"rgba(255,127,14,1)"}},"showlegend":false,"name":"TF-IDF","type":"bar","error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"xaxis":"x2","yaxis":"y2","frame":null}],"layout":{"xaxis":{"domain":[0,0.45000000000000001],"automargin":true,"title":{"text":"Word Frequency","standoff":30},"anchor":"y"},"xaxis2":{"domain":[0.55000000000000004,1],"automargin":true,"title":{"text":"TF-IDF Score","standoff":30},"anchor":"y2"},"yaxis2":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["superhero","batman","terminator","franchise","spider","wolverine","x","marvel","deadpool","wick"],"anchor":"x2","title":""},"yaxis":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["character","movies","best","man","first","great","time","story","like","action"],"anchor":"x","title":""},"annotations":[],"shapes":[],"images":[],"margin":{"b":40,"l":60,"t":30,"r":10},"hovermode":"closest","showlegend":false,"title":{"text":"Top 10 Most Frequent and Distinctive Words in Reviews by Genre","x":0.5,"xanchor":"center","font":{"size":20}}},"attrs":{"849c6f68752b":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#1f77b4"},"showlegend":false,"name":"Word Frequency","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"},"849c36995f5a":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#ff7f0e"},"showlegend":false,"name":"TF-IDF","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"subplot":true,"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="plot_Adventure" style="display:none">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-04d9b4d79175c753b60a" style="width:100%;height:400px;"></div>
+<script type="application/json" data-for="htmlwidget-04d9b4d79175c753b60a">{"x":{"data":[{"x":[240,213,198,193,143,132,124,123,117,115],"y":["like","time","story","great","still","get","first","action","characters","way"],"orientation":"h","text":["Word: like <br>Frequency: 240","Word: time <br>Frequency: 213","Word: story <br>Frequency: 198","Word: great <br>Frequency: 193","Word: still <br>Frequency: 143","Word: get <br>Frequency: 132","Word: first <br>Frequency: 124","Word: action <br>Frequency: 123","Word: characters <br>Frequency: 117","Word: way <br>Frequency: 115"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#1f77b4","line":{"color":"rgba(31,119,180,1)"}},"showlegend":false,"name":"Word Frequency","type":"bar","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0036267251542691876,0.0035765839681959413,0.0035353514022285364,0.0030177427231653253,0.0029548430203309587,0.0027942062251530789,0.0024085966307344194,0.0023950071773475765,0.0023471332291285863,0.0022581496243562868],"y":["wars","wizard","bond","goldfinger","potter","tolkien","adventure","avengers","fellowship","empire"],"orientation":"h","text":["Word: wars <br>TF-IDF: 0.0036","Word: wizard <br>TF-IDF: 0.0036","Word: bond <br>TF-IDF: 0.0035","Word: goldfinger <br>TF-IDF: 0.003","Word: potter <br>TF-IDF: 0.003","Word: tolkien <br>TF-IDF: 0.0028","Word: adventure <br>TF-IDF: 0.0024","Word: avengers <br>TF-IDF: 0.0024","Word: fellowship <br>TF-IDF: 0.0023","Word: empire <br>TF-IDF: 0.0023"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#ff7f0e","line":{"color":"rgba(255,127,14,1)"}},"showlegend":false,"name":"TF-IDF","type":"bar","error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"xaxis":"x2","yaxis":"y2","frame":null}],"layout":{"xaxis":{"domain":[0,0.45000000000000001],"automargin":true,"title":{"text":"Word Frequency","standoff":30},"anchor":"y"},"xaxis2":{"domain":[0.55000000000000004,1],"automargin":true,"title":{"text":"TF-IDF Score","standoff":30},"anchor":"y2"},"yaxis2":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["empire","fellowship","avengers","adventure","tolkien","potter","goldfinger","bond","wizard","wars"],"anchor":"x2","title":""},"yaxis":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["way","characters","action","first","get","still","great","story","time","like"],"anchor":"x","title":""},"annotations":[],"shapes":[],"images":[],"margin":{"b":40,"l":60,"t":30,"r":10},"hovermode":"closest","showlegend":false,"title":{"text":"Top 10 Most Frequent and Distinctive Words in Reviews by Genre","x":0.5,"xanchor":"center","font":{"size":20}}},"attrs":{"849c2e6c73e9":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#1f77b4"},"showlegend":false,"name":"Word Frequency","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"},"849c1f442de9":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#ff7f0e"},"showlegend":false,"name":"TF-IDF","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"subplot":true,"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="plot_Animation" style="display:none">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-2b8b8da8f356a7d65cf1" style="width:100%;height:400px;"></div>
+<script type="application/json" data-for="htmlwidget-2b8b8da8f356a7d65cf1">{"x":{"data":[{"x":[200,180,135,123,97,90,88,88,83,83],"y":["story","animation","like","characters","animated","great","disney","new","family","world"],"orientation":"h","text":["Word: story <br>Frequency: 200","Word: animation <br>Frequency: 180","Word: like <br>Frequency: 135","Word: characters <br>Frequency: 123","Word: animated <br>Frequency: 97","Word: great <br>Frequency: 90","Word: disney <br>Frequency: 88","Word: new <br>Frequency: 88","Word: family <br>Frequency: 83","Word: world <br>Frequency: 83"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#1f77b4","line":{"color":"rgba(31,119,180,1)"}},"showlegend":false,"name":"Word Frequency","type":"bar","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.01201831628856706,0.0078204751454857956,0.007610348561824928,0.0059941043950413608,0.0057827448955110614,0.0056308253407964292,0.0052675462865514984,0.0050059418617822435,0.0036327905424493093,0.0032695114882043781],"y":["animation","pixar","animated","kubo","spider","raya","mario","disney","riley","tetsuo"],"orientation":"h","text":["Word: animation <br>TF-IDF: 0.012","Word: pixar <br>TF-IDF: 0.0078","Word: animated <br>TF-IDF: 0.0076","Word: kubo <br>TF-IDF: 0.006","Word: spider <br>TF-IDF: 0.0058","Word: raya <br>TF-IDF: 0.0056","Word: mario <br>TF-IDF: 0.0053","Word: disney <br>TF-IDF: 0.005","Word: riley <br>TF-IDF: 0.0036","Word: tetsuo <br>TF-IDF: 0.0033"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#ff7f0e","line":{"color":"rgba(255,127,14,1)"}},"showlegend":false,"name":"TF-IDF","type":"bar","error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"xaxis":"x2","yaxis":"y2","frame":null}],"layout":{"xaxis":{"domain":[0,0.45000000000000001],"automargin":true,"title":{"text":"Word Frequency","standoff":30},"anchor":"y"},"xaxis2":{"domain":[0.55000000000000004,1],"automargin":true,"title":{"text":"TF-IDF Score","standoff":30},"anchor":"y2"},"yaxis2":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["tetsuo","riley","disney","mario","raya","spider","kubo","animated","pixar","animation"],"anchor":"x2","title":""},"yaxis":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["family","world","disney","new","great","animated","characters","like","animation","story"],"anchor":"x","title":""},"annotations":[],"shapes":[],"images":[],"margin":{"b":40,"l":60,"t":30,"r":10},"hovermode":"closest","showlegend":false,"title":{"text":"Top 10 Most Frequent and Distinctive Words in Reviews by Genre","x":0.5,"xanchor":"center","font":{"size":20}}},"attrs":{"849c34924f1":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#1f77b4"},"showlegend":false,"name":"Word Frequency","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"},"849c2992320e":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#ff7f0e"},"showlegend":false,"name":"TF-IDF","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"subplot":true,"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="plot_Comedy" style="display:none">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-d876e61a66845f6dacf0" style="width:100%;height:400px;"></div>
+<script type="application/json" data-for="htmlwidget-d876e61a66845f6dacf0">{"x":{"data":[{"x":[202,167,159,150,137,129,104,101,99,95],"y":["like","story","best","time","great","comedy","way","character","life","watch"],"orientation":"h","text":["Word: like <br>Frequency: 202","Word: story <br>Frequency: 167","Word: best <br>Frequency: 159","Word: time <br>Frequency: 150","Word: great <br>Frequency: 137","Word: comedy <br>Frequency: 129","Word: way <br>Frequency: 104","Word: character <br>Frequency: 101","Word: life <br>Frequency: 99","Word: watch <br>Frequency: 95"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#1f77b4","line":{"color":"rgba(31,119,180,1)"}},"showlegend":false,"name":"Word Frequency","type":"bar","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0033969874456910979,0.0032711730958506868,0.0032711730958506868,0.0028937300463294539,0.0025162869968082206,0.0023904726469678099,0.0023904726469678099,0.0022646582971273988,0.0021388439472869876,0.0019952734828633527],"y":["cruella","bong","chaplin","parasite","waititi","jojo","truman","kims","parks","comedy"],"orientation":"h","text":["Word: cruella <br>TF-IDF: 0.0034","Word: bong <br>TF-IDF: 0.0033","Word: chaplin <br>TF-IDF: 0.0033","Word: parasite <br>TF-IDF: 0.0029","Word: waititi <br>TF-IDF: 0.0025","Word: jojo <br>TF-IDF: 0.0024","Word: truman <br>TF-IDF: 0.0024","Word: kims <br>TF-IDF: 0.0023","Word: parks <br>TF-IDF: 0.0021","Word: comedy <br>TF-IDF: 0.002"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#ff7f0e","line":{"color":"rgba(255,127,14,1)"}},"showlegend":false,"name":"TF-IDF","type":"bar","error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"xaxis":"x2","yaxis":"y2","frame":null}],"layout":{"xaxis":{"domain":[0,0.45000000000000001],"automargin":true,"title":{"text":"Word Frequency","standoff":30},"anchor":"y"},"xaxis2":{"domain":[0.55000000000000004,1],"automargin":true,"title":{"text":"TF-IDF Score","standoff":30},"anchor":"y2"},"yaxis2":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["comedy","parks","kims","jojo","truman","waititi","parasite","bong","chaplin","cruella"],"anchor":"x2","title":""},"yaxis":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["watch","life","character","way","comedy","great","time","best","story","like"],"anchor":"x","title":""},"annotations":[],"shapes":[],"images":[],"margin":{"b":40,"l":60,"t":30,"r":10},"hovermode":"closest","showlegend":false,"title":{"text":"Top 10 Most Frequent and Distinctive Words in Reviews by Genre","x":0.5,"xanchor":"center","font":{"size":20}}},"attrs":{"849c1bee4105":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#1f77b4"},"showlegend":false,"name":"Word Frequency","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"},"849c238d58b9":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#ff7f0e"},"showlegend":false,"name":"TF-IDF","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"subplot":true,"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="plot_Crime" style="display:none">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-80d233b07b503227ef43" style="width:100%;height:400px;"></div>
+<script type="application/json" data-for="htmlwidget-80d233b07b503227ef43">{"x":{"data":[{"x":[184,171,146,132,127,109,107,93,92,89],"y":["story","like","time","great","best","way","character","work","people","batman"],"orientation":"h","text":["Word: story <br>Frequency: 184","Word: like <br>Frequency: 171","Word: time <br>Frequency: 146","Word: great <br>Frequency: 132","Word: best <br>Frequency: 127","Word: way <br>Frequency: 109","Word: character <br>Frequency: 107","Word: work <br>Frequency: 93","Word: people <br>Frequency: 92","Word: batman <br>Frequency: 89"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#1f77b4","line":{"color":"rgba(31,119,180,1)"}},"showlegend":false,"name":"Word Frequency","type":"bar","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0063569896615005752,0.0036166198750563192,0.0034999547177964377,0.0032605496417278989,0.0030332940887569126,0.0029790384660002582,0.0029080577885681256,0.0027402816399039612,0.0026436888986982963,0.0025666334597173874],"y":["batman","sheeran","irishman","niro","statham","joker","scorsese","crime","pacino","papillon"],"orientation":"h","text":["Word: batman <br>TF-IDF: 0.0064","Word: sheeran <br>TF-IDF: 0.0036","Word: irishman <br>TF-IDF: 0.0035","Word: niro <br>TF-IDF: 0.0033","Word: statham <br>TF-IDF: 0.003","Word: joker <br>TF-IDF: 0.003","Word: scorsese <br>TF-IDF: 0.0029","Word: crime <br>TF-IDF: 0.0027","Word: pacino <br>TF-IDF: 0.0026","Word: papillon <br>TF-IDF: 0.0026"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#ff7f0e","line":{"color":"rgba(255,127,14,1)"}},"showlegend":false,"name":"TF-IDF","type":"bar","error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"xaxis":"x2","yaxis":"y2","frame":null}],"layout":{"xaxis":{"domain":[0,0.45000000000000001],"automargin":true,"title":{"text":"Word Frequency","standoff":30},"anchor":"y"},"xaxis2":{"domain":[0.55000000000000004,1],"automargin":true,"title":{"text":"TF-IDF Score","standoff":30},"anchor":"y2"},"yaxis2":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["papillon","pacino","crime","scorsese","joker","statham","niro","irishman","sheeran","batman"],"anchor":"x2","title":""},"yaxis":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["batman","people","work","character","way","best","great","time","like","story"],"anchor":"x","title":""},"annotations":[],"shapes":[],"images":[],"margin":{"b":40,"l":60,"t":30,"r":10},"hovermode":"closest","showlegend":false,"title":{"text":"Top 10 Most Frequent and Distinctive Words in Reviews by Genre","x":0.5,"xanchor":"center","font":{"size":20}}},"attrs":{"849c6c5a7bb9":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#1f77b4"},"showlegend":false,"name":"Word Frequency","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"},"849c3c94a3f":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#ff7f0e"},"showlegend":false,"name":"TF-IDF","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"subplot":true,"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="plot_Drama" style="display:none">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-4a9e4dd32e96f53aabfc" style="width:100%;height:400px;"></div>
+<script type="application/json" data-for="htmlwidget-4a9e4dd32e96f53aabfc">{"x":{"data":[{"x":[880,613,523,476,460,421,398,383,378,338],"y":["story","like","time","life","best","great","way","us","character","characters"],"orientation":"h","text":["Word: story <br>Frequency: 880","Word: like <br>Frequency: 613","Word: time <br>Frequency: 523","Word: life <br>Frequency: 476","Word: best <br>Frequency: 460","Word: great <br>Frequency: 421","Word: way <br>Frequency: 398","Word: us <br>Frequency: 383","Word: character <br>Frequency: 378","Word: characters <br>Frequency: 338"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#1f77b4","line":{"color":"rgba(31,119,180,1)"}},"showlegend":false,"name":"Word Frequency","type":"bar","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0011359482115696077,0.0010831134110314865,0.00095102640968618331,0.00095102640968618331,0.00092460900941712253,0.00091790097270651628,0.00084535680860994063,0.00084535680860994063,0.00079817475887523155,0.0007925220080718194],"y":["marriage","django","ferrari","trial","eight","community","addiction","elvis","biopic","zain"],"orientation":"h","text":["Word: marriage <br>TF-IDF: 0.0011","Word: django <br>TF-IDF: 0.0011","Word: ferrari <br>TF-IDF: 0.001","Word: trial <br>TF-IDF: 0.001","Word: eight <br>TF-IDF: 9e-04","Word: community <br>TF-IDF: 9e-04","Word: addiction <br>TF-IDF: 8e-04","Word: elvis <br>TF-IDF: 8e-04","Word: biopic <br>TF-IDF: 8e-04","Word: zain <br>TF-IDF: 8e-04"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#ff7f0e","line":{"color":"rgba(255,127,14,1)"}},"showlegend":false,"name":"TF-IDF","type":"bar","error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"xaxis":"x2","yaxis":"y2","frame":null}],"layout":{"xaxis":{"domain":[0,0.45000000000000001],"automargin":true,"title":{"text":"Word Frequency","standoff":30},"anchor":"y"},"xaxis2":{"domain":[0.55000000000000004,1],"automargin":true,"title":{"text":"TF-IDF Score","standoff":30},"anchor":"y2"},"yaxis2":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["zain","biopic","addiction","elvis","community","eight","ferrari","trial","django","marriage"],"anchor":"x2","title":""},"yaxis":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["characters","character","us","way","great","best","life","time","like","story"],"anchor":"x","title":""},"annotations":[],"shapes":[],"images":[],"margin":{"b":40,"l":60,"t":30,"r":10},"hovermode":"closest","showlegend":false,"title":{"text":"Top 10 Most Frequent and Distinctive Words in Reviews by Genre","x":0.5,"xanchor":"center","font":{"size":20}}},"attrs":{"849c175e5928":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#1f77b4"},"showlegend":false,"name":"Word Frequency","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"},"849c3846dad":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#ff7f0e"},"showlegend":false,"name":"TF-IDF","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"subplot":true,"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="plot_Family" style="display:none">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-034ee9b40d931c00efd0" style="width:100%;height:400px;"></div>
+<script type="application/json" data-for="htmlwidget-034ee9b40d931c00efd0">{"x":{"data":[{"x":[50,33,30,28,23,22,21,21,21,20],"y":["story","animation","like","characters","great","still","disney","family","something","time"],"orientation":"h","text":["Word: story <br>Frequency: 50","Word: animation <br>Frequency: 33","Word: like <br>Frequency: 30","Word: characters <br>Frequency: 28","Word: great <br>Frequency: 23","Word: still <br>Frequency: 22","Word: disney <br>Frequency: 21","Word: family <br>Frequency: 21","Word: something <br>Frequency: 21","Word: time <br>Frequency: 20"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#1f77b4","line":{"color":"rgba(31,119,180,1)"}},"showlegend":false,"name":"Word Frequency","type":"bar","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.022088461622059897,0.017862774360358276,0.016198205189510591,0.014459906510109938,0.013347606009332252,0.011780512865098612,0.010825923854762592,0.009684702232338336,0.009540868749652669,0.0088353846488239598],"y":["tarzan","animation","onward","pixar","toy","simba","voice","disney","animated","collins"],"orientation":"h","text":["Word: tarzan <br>TF-IDF: 0.0221","Word: animation <br>TF-IDF: 0.0179","Word: onward <br>TF-IDF: 0.0162","Word: pixar <br>TF-IDF: 0.0145","Word: toy <br>TF-IDF: 0.0133","Word: simba <br>TF-IDF: 0.0118","Word: voice <br>TF-IDF: 0.0108","Word: disney <br>TF-IDF: 0.0097","Word: animated <br>TF-IDF: 0.0095","Word: collins <br>TF-IDF: 0.0088"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#ff7f0e","line":{"color":"rgba(255,127,14,1)"}},"showlegend":false,"name":"TF-IDF","type":"bar","error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"xaxis":"x2","yaxis":"y2","frame":null}],"layout":{"xaxis":{"domain":[0,0.45000000000000001],"automargin":true,"title":{"text":"Word Frequency","standoff":30},"anchor":"y"},"xaxis2":{"domain":[0.55000000000000004,1],"automargin":true,"title":{"text":"TF-IDF Score","standoff":30},"anchor":"y2"},"yaxis2":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["collins","animated","disney","voice","simba","toy","pixar","onward","animation","tarzan"],"anchor":"x2","title":""},"yaxis":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["time","disney","family","something","still","great","characters","like","animation","story"],"anchor":"x","title":""},"annotations":[],"shapes":[],"images":[],"margin":{"b":40,"l":60,"t":30,"r":10},"hovermode":"closest","showlegend":false,"title":{"text":"Top 10 Most Frequent and Distinctive Words in Reviews by Genre","x":0.5,"xanchor":"center","font":{"size":20}}},"attrs":{"849c54a5be5":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#1f77b4"},"showlegend":false,"name":"Word Frequency","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"},"849c5c97765b":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#ff7f0e"},"showlegend":false,"name":"TF-IDF","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"subplot":true,"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="plot_Fantasy" style="display:none">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-8a7dd398c826e79f2446" style="width:100%;height:400px;"></div>
+<script type="application/json" data-for="htmlwidget-8a7dd398c826e79f2446">{"x":{"data":[{"x":[52,52,51,39,38,36,30,29,29,29],"y":["like","story","time","great","quite","world","now","character","characters","first"],"orientation":"h","text":["Word: like <br>Frequency: 52","Word: story <br>Frequency: 52","Word: time <br>Frequency: 51","Word: great <br>Frequency: 39","Word: quite <br>Frequency: 38","Word: world <br>Frequency: 36","Word: now <br>Frequency: 30","Word: character <br>Frequency: 29","Word: characters <br>Frequency: 29","Word: first <br>Frequency: 29"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#1f77b4","line":{"color":"rgba(31,119,180,1)"}},"showlegend":false,"name":"Word Frequency","type":"bar","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0092588671374386148,0.0077157226145321799,0.0069936802728636305,0.0064108735834583269,0.0063046578777181941,0.005828066894053025,0.0054010058301725257,0.0054010058301725257,0.0054010058301725257,0.0054010058301725257],"y":["beetlejuice","crow","ghostbusters","potter","cruise","alexander","brandon","caribbean","dwayne","fanny"],"orientation":"h","text":["Word: beetlejuice <br>TF-IDF: 0.0093","Word: crow <br>TF-IDF: 0.0077","Word: ghostbusters <br>TF-IDF: 0.007","Word: potter <br>TF-IDF: 0.0064","Word: cruise <br>TF-IDF: 0.0063","Word: alexander <br>TF-IDF: 0.0058","Word: brandon <br>TF-IDF: 0.0054","Word: caribbean <br>TF-IDF: 0.0054","Word: dwayne <br>TF-IDF: 0.0054","Word: fanny <br>TF-IDF: 0.0054"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#ff7f0e","line":{"color":"rgba(255,127,14,1)"}},"showlegend":false,"name":"TF-IDF","type":"bar","error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"xaxis":"x2","yaxis":"y2","frame":null}],"layout":{"xaxis":{"domain":[0,0.45000000000000001],"automargin":true,"title":{"text":"Word Frequency","standoff":30},"anchor":"y"},"xaxis2":{"domain":[0.55000000000000004,1],"automargin":true,"title":{"text":"TF-IDF Score","standoff":30},"anchor":"y2"},"yaxis2":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["brandon","caribbean","dwayne","fanny","alexander","cruise","potter","ghostbusters","crow","beetlejuice"],"anchor":"x2","title":""},"yaxis":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["character","characters","first","now","world","quite","great","time","like","story"],"anchor":"x","title":""},"annotations":[],"shapes":[],"images":[],"margin":{"b":40,"l":60,"t":30,"r":10},"hovermode":"closest","showlegend":false,"title":{"text":"Top 10 Most Frequent and Distinctive Words in Reviews by Genre","x":0.5,"xanchor":"center","font":{"size":20}}},"attrs":{"849c77f36f35":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#1f77b4"},"showlegend":false,"name":"Word Frequency","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"},"849c1b44fc4":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#ff7f0e"},"showlegend":false,"name":"TF-IDF","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"subplot":true,"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="plot_History" style="display:none">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-df00e57d6ad7f57ced20" style="width:100%;height:400px;"></div>
+<script type="application/json" data-for="htmlwidget-df00e57d6ad7f57ced20">{"x":{"data":[{"x":[41,21,16,16,15,15,15,14,14,13],"y":["story","spartacus","scenes","time","family","like","though","made","young","feel"],"orientation":"h","text":["Word: story <br>Frequency: 41","Word: spartacus <br>Frequency: 21","Word: scenes <br>Frequency: 16","Word: time <br>Frequency: 16","Word: family <br>Frequency: 15","Word: like <br>Frequency: 15","Word: though <br>Frequency: 15","Word: made <br>Frequency: 14","Word: young <br>Frequency: 14","Word: feel <br>Frequency: 13"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#1f77b4","line":{"color":"rgba(31,119,180,1)"}},"showlegend":false,"name":"Word Frequency","type":"bar","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.050896048096818254,0.019388970703549811,0.016965349365606085,0.014541728027662359,0.014541728027662359,0.014541728027662359,0.014541728027662359,0.014541728027662359,0.012814767446085455,0.012377407895092604],"y":["spartacus","duel","trudy","claw","crassus","salieri","swim","wrestling","von","roman"],"orientation":"h","text":["Word: spartacus <br>TF-IDF: 0.0509","Word: duel <br>TF-IDF: 0.0194","Word: trudy <br>TF-IDF: 0.017","Word: claw <br>TF-IDF: 0.0145","Word: crassus <br>TF-IDF: 0.0145","Word: salieri <br>TF-IDF: 0.0145","Word: swim <br>TF-IDF: 0.0145","Word: wrestling <br>TF-IDF: 0.0145","Word: von <br>TF-IDF: 0.0128","Word: roman <br>TF-IDF: 0.0124"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#ff7f0e","line":{"color":"rgba(255,127,14,1)"}},"showlegend":false,"name":"TF-IDF","type":"bar","error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"xaxis":"x2","yaxis":"y2","frame":null}],"layout":{"xaxis":{"domain":[0,0.45000000000000001],"automargin":true,"title":{"text":"Word Frequency","standoff":30},"anchor":"y"},"xaxis2":{"domain":[0.55000000000000004,1],"automargin":true,"title":{"text":"TF-IDF Score","standoff":30},"anchor":"y2"},"yaxis2":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["roman","von","claw","crassus","salieri","swim","wrestling","trudy","duel","spartacus"],"anchor":"x2","title":""},"yaxis":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["feel","made","young","family","like","though","scenes","time","spartacus","story"],"anchor":"x","title":""},"annotations":[],"shapes":[],"images":[],"margin":{"b":40,"l":60,"t":30,"r":10},"hovermode":"closest","showlegend":false,"title":{"text":"Top 10 Most Frequent and Distinctive Words in Reviews by Genre","x":0.5,"xanchor":"center","font":{"size":20}}},"attrs":{"849c7daa717b":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#1f77b4"},"showlegend":false,"name":"Word Frequency","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"},"849c3e6e7b94":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#ff7f0e"},"showlegend":false,"name":"TF-IDF","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"subplot":true,"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="plot_Horror" style="display:none">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-43c326dec12cfd3ad607" style="width:100%;height:400px;"></div>
+<script type="application/json" data-for="htmlwidget-43c326dec12cfd3ad607">{"x":{"data":[{"x":[163,99,99,88,70,63,58,58,52,51],"y":["horror","like","story","time","great","still","best","thing","first","see"],"orientation":"h","text":["Word: horror <br>Frequency: 163","Word: like <br>Frequency: 99","Word: story <br>Frequency: 99","Word: time <br>Frequency: 88","Word: great <br>Frequency: 70","Word: still <br>Frequency: 63","Word: best <br>Frequency: 58","Word: thing <br>Frequency: 58","Word: first <br>Frequency: 52","Word: see <br>Frequency: 51"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#1f77b4","line":{"color":"rgba(31,119,180,1)"}},"showlegend":false,"name":"Word Frequency","type":"bar","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.010867221279617015,0.006766032220901985,0.0065154384349426515,0.0055130632911053207,0.0050118757191866554,0.0047612819332273227,0.0035964317270855426,0.003375307201356655,0.0032577192174713257,0.0032472371261864029],"y":["horror","zombie","halloween","shark","conjuring","carpenter","zombies","supernatural","scares","monster"],"orientation":"h","text":["Word: horror <br>TF-IDF: 0.0109","Word: zombie <br>TF-IDF: 0.0068","Word: halloween <br>TF-IDF: 0.0065","Word: shark <br>TF-IDF: 0.0055","Word: conjuring <br>TF-IDF: 0.005","Word: carpenter <br>TF-IDF: 0.0048","Word: zombies <br>TF-IDF: 0.0036","Word: supernatural <br>TF-IDF: 0.0034","Word: scares <br>TF-IDF: 0.0033","Word: monster <br>TF-IDF: 0.0032"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#ff7f0e","line":{"color":"rgba(255,127,14,1)"}},"showlegend":false,"name":"TF-IDF","type":"bar","error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"xaxis":"x2","yaxis":"y2","frame":null}],"layout":{"xaxis":{"domain":[0,0.45000000000000001],"automargin":true,"title":{"text":"Word Frequency","standoff":30},"anchor":"y"},"xaxis2":{"domain":[0.55000000000000004,1],"automargin":true,"title":{"text":"TF-IDF Score","standoff":30},"anchor":"y2"},"yaxis2":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["monster","scares","supernatural","zombies","carpenter","conjuring","shark","halloween","zombie","horror"],"anchor":"x2","title":""},"yaxis":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["see","first","best","thing","still","great","time","like","story","horror"],"anchor":"x","title":""},"annotations":[],"shapes":[],"images":[],"margin":{"b":40,"l":60,"t":30,"r":10},"hovermode":"closest","showlegend":false,"title":{"text":"Top 10 Most Frequent and Distinctive Words in Reviews by Genre","x":0.5,"xanchor":"center","font":{"size":20}}},"attrs":{"849c40922f3":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#1f77b4"},"showlegend":false,"name":"Word Frequency","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"},"849c33b17603":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#ff7f0e"},"showlegend":false,"name":"TF-IDF","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"subplot":true,"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="plot_Music" style="display:none">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-fe562c08915c816574ce" style="width:100%;height:400px;"></div>
+<script type="application/json" data-for="htmlwidget-fe562c08915c816574ce">{"x":{"data":[{"x":[36,28,27,27,26,22,20,19,18,18],"y":["story","see","best","music","time","never","musical","john","love","star"],"orientation":"h","text":["Word: story <br>Frequency: 36","Word: see <br>Frequency: 28","Word: best <br>Frequency: 27","Word: music <br>Frequency: 27","Word: time <br>Frequency: 26","Word: never <br>Frequency: 22","Word: musical <br>Frequency: 20","Word: john <br>Frequency: 19","Word: love <br>Frequency: 18","Word: star <br>Frequency: 18"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#1f77b4","line":{"color":"rgba(31,119,180,1)"}},"showlegend":false,"name":"Word Frequency","type":"bar","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.024583196043871724,0.023046746291129738,0.018568903804739877,0.018437397032903792,0.016247790829147391,0.01599144139999881,0.012291598021935862,0.012291598021935862,0.012291598021935862,0.011605564877962422],"y":["blues","maine","cooper","gaga","elton","rock","bohemian","rhapsody","rocketman","queen"],"orientation":"h","text":["Word: blues <br>TF-IDF: 0.0246","Word: maine <br>TF-IDF: 0.023","Word: cooper <br>TF-IDF: 0.0186","Word: gaga <br>TF-IDF: 0.0184","Word: elton <br>TF-IDF: 0.0162","Word: rock <br>TF-IDF: 0.016","Word: bohemian <br>TF-IDF: 0.0123","Word: rhapsody <br>TF-IDF: 0.0123","Word: rocketman <br>TF-IDF: 0.0123","Word: queen <br>TF-IDF: 0.0116"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#ff7f0e","line":{"color":"rgba(255,127,14,1)"}},"showlegend":false,"name":"TF-IDF","type":"bar","error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"xaxis":"x2","yaxis":"y2","frame":null}],"layout":{"xaxis":{"domain":[0,0.45000000000000001],"automargin":true,"title":{"text":"Word Frequency","standoff":30},"anchor":"y"},"xaxis2":{"domain":[0.55000000000000004,1],"automargin":true,"title":{"text":"TF-IDF Score","standoff":30},"anchor":"y2"},"yaxis2":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["queen","bohemian","rhapsody","rocketman","rock","elton","gaga","cooper","maine","blues"],"anchor":"x2","title":""},"yaxis":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["love","star","john","musical","never","time","best","music","see","story"],"anchor":"x","title":""},"annotations":[],"shapes":[],"images":[],"margin":{"b":40,"l":60,"t":30,"r":10},"hovermode":"closest","showlegend":false,"title":{"text":"Top 10 Most Frequent and Distinctive Words in Reviews by Genre","x":0.5,"xanchor":"center","font":{"size":20}}},"attrs":{"849c3cd95ca3":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#1f77b4"},"showlegend":false,"name":"Word Frequency","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"},"849c74f7462":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#ff7f0e"},"showlegend":false,"name":"TF-IDF","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"subplot":true,"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="plot_Mystery" style="display:none">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-1da802cc2843b9cc025f" style="width:100%;height:400px;"></div>
+<script type="application/json" data-for="htmlwidget-1da802cc2843b9cc025f">{"x":{"data":[{"x":[73,64,63,57,54,46,44,43,42,37],"y":["time","like","story","people","best","character","see","never","first","jong"],"orientation":"h","text":["Word: time <br>Frequency: 73","Word: like <br>Frequency: 64","Word: story <br>Frequency: 63","Word: people <br>Frequency: 57","Word: best <br>Frequency: 54","Word: character <br>Frequency: 46","Word: see <br>Frequency: 44","Word: never <br>Frequency: 43","Word: first <br>Frequency: 42","Word: jong <br>Frequency: 37"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#1f77b4","line":{"color":"rgba(31,119,180,1)"}},"showlegend":false,"name":"Word Frequency","type":"bar","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.014825186498384952,0.011619740769004421,0.01081837933665929,0.0081716569671049805,0.0078690030053603505,0.0075663490436157221,0.0068115721749336267,0.0057504252731479487,0.0056095300264159282,0.004808168594070795],"y":["jong","su","mi","hae","welles","kane","watchmen","mrs","citizen","fontaine"],"orientation":"h","text":["Word: jong <br>TF-IDF: 0.0148","Word: su <br>TF-IDF: 0.0116","Word: mi <br>TF-IDF: 0.0108","Word: hae <br>TF-IDF: 0.0082","Word: welles <br>TF-IDF: 0.0079","Word: kane <br>TF-IDF: 0.0076","Word: watchmen <br>TF-IDF: 0.0068","Word: mrs <br>TF-IDF: 0.0058","Word: citizen <br>TF-IDF: 0.0056","Word: fontaine <br>TF-IDF: 0.0048"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#ff7f0e","line":{"color":"rgba(255,127,14,1)"}},"showlegend":false,"name":"TF-IDF","type":"bar","error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"xaxis":"x2","yaxis":"y2","frame":null}],"layout":{"xaxis":{"domain":[0,0.45000000000000001],"automargin":true,"title":{"text":"Word Frequency","standoff":30},"anchor":"y"},"xaxis2":{"domain":[0.55000000000000004,1],"automargin":true,"title":{"text":"TF-IDF Score","standoff":30},"anchor":"y2"},"yaxis2":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["fontaine","citizen","mrs","watchmen","kane","welles","hae","mi","su","jong"],"anchor":"x2","title":""},"yaxis":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["jong","first","never","see","character","best","people","story","like","time"],"anchor":"x","title":""},"annotations":[],"shapes":[],"images":[],"margin":{"b":40,"l":60,"t":30,"r":10},"hovermode":"closest","showlegend":false,"title":{"text":"Top 10 Most Frequent and Distinctive Words in Reviews by Genre","x":0.5,"xanchor":"center","font":{"size":20}}},"attrs":{"849c459338f":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#1f77b4"},"showlegend":false,"name":"Word Frequency","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"},"849c1a8a11f3":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#ff7f0e"},"showlegend":false,"name":"TF-IDF","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"subplot":true,"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="plot_Romance" style="display:none">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-af32f1e1fa2225df9537" style="width:100%;height:400px;"></div>
+<script type="application/json" data-for="htmlwidget-af32f1e1fa2225df9537">{"x":{"data":[{"x":[77,71,61,54,41,40,37,36,35,31],"y":["love","story","time","like","character","life","us","see","first","best"],"orientation":"h","text":["Word: love <br>Frequency: 77","Word: story <br>Frequency: 71","Word: time <br>Frequency: 61","Word: like <br>Frequency: 54","Word: character <br>Frequency: 41","Word: life <br>Frequency: 40","Word: us <br>Frequency: 37","Word: see <br>Frequency: 36","Word: first <br>Frequency: 35","Word: best <br>Frequency: 31"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#1f77b4","line":{"color":"rgba(31,119,180,1)"}},"showlegend":false,"name":"Word Frequency","type":"bar","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0071096947153230011,0.0057538971952758667,0.005596490230683978,0.0055861887048966451,0.0055861887048966451,0.0053703040489241419,0.0050783533680878578,0.0050783533680878578,0.0042195246098689692,0.0041496152943146089],"y":["shults","waves","tyler","grease","sandy","johnny","gilda","pawlikowski","roberts","edward"],"orientation":"h","text":["Word: shults <br>TF-IDF: 0.0071","Word: waves <br>TF-IDF: 0.0058","Word: tyler <br>TF-IDF: 0.0056","Word: grease <br>TF-IDF: 0.0056","Word: sandy <br>TF-IDF: 0.0056","Word: johnny <br>TF-IDF: 0.0054","Word: gilda <br>TF-IDF: 0.0051","Word: pawlikowski <br>TF-IDF: 0.0051","Word: roberts <br>TF-IDF: 0.0042","Word: edward <br>TF-IDF: 0.0041"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#ff7f0e","line":{"color":"rgba(255,127,14,1)"}},"showlegend":false,"name":"TF-IDF","type":"bar","error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"xaxis":"x2","yaxis":"y2","frame":null}],"layout":{"xaxis":{"domain":[0,0.45000000000000001],"automargin":true,"title":{"text":"Word Frequency","standoff":30},"anchor":"y"},"xaxis2":{"domain":[0.55000000000000004,1],"automargin":true,"title":{"text":"TF-IDF Score","standoff":30},"anchor":"y2"},"yaxis2":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["edward","roberts","gilda","pawlikowski","johnny","grease","sandy","tyler","waves","shults"],"anchor":"x2","title":""},"yaxis":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["best","first","see","us","life","character","like","time","story","love"],"anchor":"x","title":""},"annotations":[],"shapes":[],"images":[],"margin":{"b":40,"l":60,"t":30,"r":10},"hovermode":"closest","showlegend":false,"title":{"text":"Top 10 Most Frequent and Distinctive Words in Reviews by Genre","x":0.5,"xanchor":"center","font":{"size":20}}},"attrs":{"849c481a2c2d":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#1f77b4"},"showlegend":false,"name":"Word Frequency","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"},"849c19513efe":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#ff7f0e"},"showlegend":false,"name":"TF-IDF","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"subplot":true,"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="plot_Science Fiction" style="display:none">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-2d3f9604f4a3980f9067" style="width:100%;height:400px;"></div>
+<script type="application/json" data-for="htmlwidget-2d3f9604f4a3980f9067">{"x":{"data":[{"x":[138,136,102,90,77,75,66,65,64,64],"y":["time","story","like","first","best","great","world","quite","characters","life"],"orientation":"h","text":["Word: time <br>Frequency: 138","Word: story <br>Frequency: 136","Word: like <br>Frequency: 102","Word: first <br>Frequency: 90","Word: best <br>Frequency: 77","Word: great <br>Frequency: 75","Word: world <br>Frequency: 66","Word: quite <br>Frequency: 65","Word: characters <br>Frequency: 64","Word: life <br>Frequency: 64"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#1f77b4","line":{"color":"rgba(31,119,180,1)"}},"showlegend":false,"name":"Word Frequency","type":"bar","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0092529509284051074,0.008649497606987383,0.0060345332141772444,0.0052299287856202789,0.005165938910818119,0.0029791019172987882,0.0028161154999493802,0.0028161154999493802,0.0028161154999493802,0.0027349088351390043],"y":["blade","runner","dune","apes","godzilla","marvel","denis","predestination","snook","villeneuve"],"orientation":"h","text":["Word: blade <br>TF-IDF: 0.0093","Word: runner <br>TF-IDF: 0.0086","Word: dune <br>TF-IDF: 0.006","Word: apes <br>TF-IDF: 0.0052","Word: godzilla <br>TF-IDF: 0.0052","Word: marvel <br>TF-IDF: 0.003","Word: denis <br>TF-IDF: 0.0028","Word: predestination <br>TF-IDF: 0.0028","Word: snook <br>TF-IDF: 0.0028","Word: villeneuve <br>TF-IDF: 0.0027"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#ff7f0e","line":{"color":"rgba(255,127,14,1)"}},"showlegend":false,"name":"TF-IDF","type":"bar","error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"xaxis":"x2","yaxis":"y2","frame":null}],"layout":{"xaxis":{"domain":[0,0.45000000000000001],"automargin":true,"title":{"text":"Word Frequency","standoff":30},"anchor":"y"},"xaxis2":{"domain":[0.55000000000000004,1],"automargin":true,"title":{"text":"TF-IDF Score","standoff":30},"anchor":"y2"},"yaxis2":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["villeneuve","denis","predestination","snook","marvel","godzilla","apes","dune","runner","blade"],"anchor":"x2","title":""},"yaxis":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["characters","life","quite","world","great","best","first","like","story","time"],"anchor":"x","title":""},"annotations":[],"shapes":[],"images":[],"margin":{"b":40,"l":60,"t":30,"r":10},"hovermode":"closest","showlegend":false,"title":{"text":"Top 10 Most Frequent and Distinctive Words in Reviews by Genre","x":0.5,"xanchor":"center","font":{"size":20}}},"attrs":{"849c1b182218":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#1f77b4"},"showlegend":false,"name":"Word Frequency","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"},"849c731f6621":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#ff7f0e"},"showlegend":false,"name":"TF-IDF","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"subplot":true,"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="plot_Thriller" style="display:none">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-ba528ce9412c308f9030" style="width:100%;height:400px;"></div>
+<script type="application/json" data-for="htmlwidget-ba528ce9412c308f9030">{"x":{"data":[{"x":[55,51,42,39,33,32,31,30,29,29],"y":["story","like","great","hitchcock","best","time","cast","now","character","still"],"orientation":"h","text":["Word: story <br>Frequency: 55","Word: like <br>Frequency: 51","Word: great <br>Frequency: 42","Word: hitchcock <br>Frequency: 39","Word: best <br>Frequency: 33","Word: time <br>Frequency: 32","Word: cast <br>Frequency: 31","Word: now <br>Frequency: 30","Word: character <br>Frequency: 29","Word: still <br>Frequency: 29"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#1f77b4","line":{"color":"rgba(31,119,180,1)"}},"showlegend":false,"name":"Word Frequency","type":"bar","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.014684054951190828,0.0079947413659064055,0.0073797612608366824,0.005647713442765703,0.0055742986676699047,0.0049198408405577883,0.0043048607354880643,0.0043048607354880643,0.0043048607354880643,0.0043048607354880643],"y":["hitchcock","sandra","travolta","heist","window","ller","anatomy","cady","fennell","sin"],"orientation":"h","text":["Word: hitchcock <br>TF-IDF: 0.0147","Word: sandra <br>TF-IDF: 0.008","Word: travolta <br>TF-IDF: 0.0074","Word: heist <br>TF-IDF: 0.0056","Word: window <br>TF-IDF: 0.0056","Word: ller <br>TF-IDF: 0.0049","Word: anatomy <br>TF-IDF: 0.0043","Word: cady <br>TF-IDF: 0.0043","Word: fennell <br>TF-IDF: 0.0043","Word: sin <br>TF-IDF: 0.0043"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#ff7f0e","line":{"color":"rgba(255,127,14,1)"}},"showlegend":false,"name":"TF-IDF","type":"bar","error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"xaxis":"x2","yaxis":"y2","frame":null}],"layout":{"xaxis":{"domain":[0,0.45000000000000001],"automargin":true,"title":{"text":"Word Frequency","standoff":30},"anchor":"y"},"xaxis2":{"domain":[0.55000000000000004,1],"automargin":true,"title":{"text":"TF-IDF Score","standoff":30},"anchor":"y2"},"yaxis2":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["anatomy","cady","fennell","sin","ller","window","heist","travolta","sandra","hitchcock"],"anchor":"x2","title":""},"yaxis":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["character","still","now","cast","time","best","hitchcock","great","like","story"],"anchor":"x","title":""},"annotations":[],"shapes":[],"images":[],"margin":{"b":40,"l":60,"t":30,"r":10},"hovermode":"closest","showlegend":false,"title":{"text":"Top 10 Most Frequent and Distinctive Words in Reviews by Genre","x":0.5,"xanchor":"center","font":{"size":20}}},"attrs":{"849c52461808":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#1f77b4"},"showlegend":false,"name":"Word Frequency","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"},"849c5b217be8":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#ff7f0e"},"showlegend":false,"name":"TF-IDF","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"subplot":true,"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="plot_War" style="display:none">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-c4e965799bd8974b41ec" style="width:100%;height:400px;"></div>
+<script type="application/json" data-for="htmlwidget-c4e965799bd8974b41ec">{"x":{"data":[{"x":[98,59,49,37,31,28,26,25,25,24],"y":["war","story","like","shot","time","men","great","first","soldiers","see"],"orientation":"h","text":["Word: war <br>Frequency: 98","Word: story <br>Frequency: 59","Word: like <br>Frequency: 49","Word: shot <br>Frequency: 37","Word: time <br>Frequency: 31","Word: men <br>Frequency: 28","Word: great <br>Frequency: 26","Word: first <br>Frequency: 25","Word: soldiers <br>Frequency: 25","Word: see <br>Frequency: 24"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#1f77b4","line":{"color":"rgba(31,119,180,1)"}},"showlegend":false,"name":"Word Frequency","type":"bar","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.015704149608397677,0.015350979979432003,0.011164349075950548,0.011129460723275237,0.0099753458723680771,0.0092377350637633387,0.0092377350637633387,0.0083139615573870045,0.0083139615573870045,0.0083139615573870045],"y":["dunkirk","mendes","tank","war","soldiers","kinley","schofield","afghanistan","ahmed","deakins"],"orientation":"h","text":["Word: dunkirk <br>TF-IDF: 0.0157","Word: mendes <br>TF-IDF: 0.0154","Word: tank <br>TF-IDF: 0.0112","Word: war <br>TF-IDF: 0.0111","Word: soldiers <br>TF-IDF: 0.01","Word: kinley <br>TF-IDF: 0.0092","Word: schofield <br>TF-IDF: 0.0092","Word: afghanistan <br>TF-IDF: 0.0083","Word: ahmed <br>TF-IDF: 0.0083","Word: deakins <br>TF-IDF: 0.0083"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#ff7f0e","line":{"color":"rgba(255,127,14,1)"}},"showlegend":false,"name":"TF-IDF","type":"bar","error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"xaxis":"x2","yaxis":"y2","frame":null}],"layout":{"xaxis":{"domain":[0,0.45000000000000001],"automargin":true,"title":{"text":"Word Frequency","standoff":30},"anchor":"y"},"xaxis2":{"domain":[0.55000000000000004,1],"automargin":true,"title":{"text":"TF-IDF Score","standoff":30},"anchor":"y2"},"yaxis2":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["afghanistan","ahmed","deakins","kinley","schofield","soldiers","war","tank","mendes","dunkirk"],"anchor":"x2","title":""},"yaxis":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["see","first","soldiers","great","men","time","shot","like","story","war"],"anchor":"x","title":""},"annotations":[],"shapes":[],"images":[],"margin":{"b":40,"l":60,"t":30,"r":10},"hovermode":"closest","showlegend":false,"title":{"text":"Top 10 Most Frequent and Distinctive Words in Reviews by Genre","x":0.5,"xanchor":"center","font":{"size":20}}},"attrs":{"849c25d26402":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#1f77b4"},"showlegend":false,"name":"Word Frequency","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"},"849c13972c9e":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#ff7f0e"},"showlegend":false,"name":"TF-IDF","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"subplot":true,"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="plot_Western" style="display:none">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-bfe66320fab57f658147" style="width:100%;height:400px;"></div>
+<script type="application/json" data-for="htmlwidget-bfe66320fab57f658147">{"x":{"data":[{"x":[88,79,61,61,60,59,56,49,43,43],"y":["western","eastwood","man","time","like","character","story","best","clint","scene"],"orientation":"h","text":["Word: western <br>Frequency: 88","Word: eastwood <br>Frequency: 79","Word: man <br>Frequency: 61","Word: time <br>Frequency: 61","Word: like <br>Frequency: 60","Word: character <br>Frequency: 59","Word: story <br>Frequency: 56","Word: best <br>Frequency: 49","Word: clint <br>Frequency: 43","Word: scene <br>Frequency: 43"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#1f77b4","line":{"color":"rgba(31,119,180,1)"}},"showlegend":false,"name":"Word Frequency","type":"bar","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.015473022698670428,0.013890554468124589,0.010716644451392036,0.0083019808066665673,0.0077343467725672563,0.0069202050070338609,0.0065131341242671637,0.0064798315287486734,0.0062306072391814168,0.0056989923587337683],"y":["western","eastwood","clint","leone","dollars","josey","cantina","westerns","west","hawks"],"orientation":"h","text":["Word: western <br>TF-IDF: 0.0155","Word: eastwood <br>TF-IDF: 0.0139","Word: clint <br>TF-IDF: 0.0107","Word: leone <br>TF-IDF: 0.0083","Word: dollars <br>TF-IDF: 0.0077","Word: josey <br>TF-IDF: 0.0069","Word: cantina <br>TF-IDF: 0.0065","Word: westerns <br>TF-IDF: 0.0065","Word: west <br>TF-IDF: 0.0062","Word: hawks <br>TF-IDF: 0.0057"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"#ff7f0e","line":{"color":"rgba(255,127,14,1)"}},"showlegend":false,"name":"TF-IDF","type":"bar","error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"xaxis":"x2","yaxis":"y2","frame":null}],"layout":{"xaxis":{"domain":[0,0.45000000000000001],"automargin":true,"title":{"text":"Word Frequency","standoff":30},"anchor":"y"},"xaxis2":{"domain":[0.55000000000000004,1],"automargin":true,"title":{"text":"TF-IDF Score","standoff":30},"anchor":"y2"},"yaxis2":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["hawks","west","westerns","cantina","josey","dollars","leone","clint","eastwood","western"],"anchor":"x2","title":""},"yaxis":{"domain":[0,1],"automargin":true,"type":"category","categoryorder":"array","categoryarray":["clint","scene","best","story","character","like","man","time","eastwood","western"],"anchor":"x","title":""},"annotations":[],"shapes":[],"images":[],"margin":{"b":40,"l":60,"t":30,"r":10},"hovermode":"closest","showlegend":false,"title":{"text":"Top 10 Most Frequent and Distinctive Words in Reviews by Genre","x":0.5,"xanchor":"center","font":{"size":20}}},"attrs":{"849c77ab6bcc":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#1f77b4"},"showlegend":false,"name":"Word Frequency","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"},"849c87c1c62":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"#ff7f0e"},"showlegend":false,"name":"TF-IDF","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"subplot":true,"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+<script>
+  document.getElementById("genreDropdown").addEventListener("change", function() {
+    const selected = this.value;
+    document.querySelectorAll("div[id^='plot_']").forEach(div => div.style.display = "none");
+    document.getElementById("plot_" + selected).style.display = "";
+  });
+</script>
+<div style="margin-bottom: 30px;">
+
+</div>
+<div style="margin-top: 1em; font-size: 0.95em; color: #555;">
+<p><strong>Figure 1:</strong> Each panel shows a horizontal bar chart of
+the top 10 words in movie reviews for the selected genre. The left chart
+ranks by raw frequency, while the right highlights words with the
+highest TF-IDF scores—indicating terms uniquely important to that
+genre.</p>
+</div>
+</div>
+<div id="insights" class="section level3">
+<h3>Insights</h3>
+<ul>
+<li><p>High-frequency and high-TF-IDF words clearly align with the
+defining themes, characters, and elements of each genre (e.g.,
+“spaceship” for Sci-Fi, “romance” for Romance).</p></li>
+<li><p>TF-IDF terms often capture names of iconic characters, emotional
+moments, or genre-defining settings, showing how audiences connect to
+movies on deeper levels.</p></li>
+</ul>
+</div>
+</div>
+<div id="sentiment-score" class="section level2">
+<h2>Sentiment Score</h2>
+<div id="word-usage-in-movie-reviews-by-genre" class="section level3">
+<h3>Word Usage in Movie Reviews by Genre</h3>
+<p>This interactive visualization shows how movie genres differ in the
+emotions they evoke from audiences.</p>
+<p>Hover over each bar to see the exact average sentiment score by
+genre.</p>
+<div class="plotly html-widget html-fill-item" id="htmlwidget-83c968ccee9a18851e61" style="width:672px;height:480px;"></div>
+<script type="application/json" data-for="htmlwidget-83c968ccee9a18851e61">{"x":{"visdat":{"849c544f1cba":["function () ","plotlyVisDat"]},"cur_data":"849c544f1cba","attrs":{"849c544f1cba":{"x":{},"y":{},"orientation":"h","text":{},"hoverinfo":"text","textposition":"none","marker":{"color":"steelblue"},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"layout":{"margin":{"b":40,"l":100,"t":50,"r":10},"title":"Average Audience Sentiment by Genre","xaxis":{"domain":[0,1],"automargin":true,"title":"Average Sentiment"},"yaxis":{"domain":[0,1],"automargin":true,"title":"Genre","type":"category","categoryorder":"array","categoryarray":["Crime","War","Mystery","Thriller","Western","Horror","Drama","History","Science Fiction","Action","Music","Fantasy","Romance","Adventure","Animation","Comedy","Family"]},"template":"plotly_white","hovermode":"closest","showlegend":false},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":[0.54428855266020038,0.68932875048490094,0.70017632916788886,0.70335848303114978,0.82354553929887164,0.91082419209891541,0.91916126606338644,0.93364712017557661,0.95206244724643485,1.0288031783761271,1.0352199310189114,1.0846352627767801,1.1547071003111402,1.2229322034885712,1.2617081197390401,1.2782880544088695,1.4005539348855851],"y":["Crime","War","Mystery","Thriller","Western","Horror","Drama","History","Science Fiction","Action","Music","Fantasy","Romance","Adventure","Animation","Comedy","Family"],"orientation":"h","text":["Genre: Crime <br>Average Sentiment: 0.544","Genre: War <br>Average Sentiment: 0.689","Genre: Mystery <br>Average Sentiment: 0.7","Genre: Thriller <br>Average Sentiment: 0.703","Genre: Western <br>Average Sentiment: 0.824","Genre: Horror <br>Average Sentiment: 0.911","Genre: Drama <br>Average Sentiment: 0.919","Genre: History <br>Average Sentiment: 0.934","Genre: Science Fiction <br>Average Sentiment: 0.952","Genre: Action <br>Average Sentiment: 1.029","Genre: Music <br>Average Sentiment: 1.035","Genre: Fantasy <br>Average Sentiment: 1.085","Genre: Romance <br>Average Sentiment: 1.155","Genre: Adventure <br>Average Sentiment: 1.223","Genre: Animation <br>Average Sentiment: 1.262","Genre: Comedy <br>Average Sentiment: 1.278","Genre: Family <br>Average Sentiment: 1.401"],"hoverinfo":["text","text","text","text","text","text","text","text","text","text","text","text","text","text","text","text","text"],"textposition":["none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none"],"marker":{"color":"steelblue","line":{"color":"rgba(31,119,180,1)"}},"type":"bar","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<div style="margin-top: 1em; font-size: 0.95em; color: #555;">
+<p><strong>Figure 2:</strong> Interactive bar chart of average audience
+sentiment across movie genres. Bars are sorted by average sentiment
+score, providing a quick visual comparison of how positively different
+genres are perceived.</p>
+</div>
+</div>
+<div id="insights-1" class="section level3">
+<h3>Insights</h3>
+<ul>
+<li><p>Genres like Family, Comedy, and Animation top the list with the
+highest average sentiment scores, reflecting more positive viewer
+experiences.</p></li>
+<li><p>In contrast, genres such as Crime and War tend to score
+lower.</p></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
