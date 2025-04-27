@@ -1,11 +1,61 @@
 ---
-title: "Movie Success Analysis"
+title: "Analyzing Movie Success"
+subtitle: "Impact of Credits, Revenue, and Audience Perception"
 output: html_document
 ---
 
 # Welcome
 
-Explore the project:
+Welcome to **Movie Success Analysis** — a project that explores what drives a film's box office success and audience reception.  
+Through integrating **credits, revenue**, and **audience review text**, this project reveals key factors influencing movie performance both financially and emotionally.
 
-- [Model Results](models.html)
-- [Text Analysis](text.html)
+---
+
+# Project Overview
+
+This project investigates two central questions:
+
+- **How do movie credits** (such as budget, cast, and genre) **influence box office revenue?**
+- **How does audience sentiment** in reviews differ across genres, and does it contribute to revenue prediction?
+
+We collected and merged data from **TMDB API** and **Kaggle**, including movie details, revenue, budget, cast, genres, and audience reviews.
+
+Our methodology combines:
+
+- **Multiple Linear Regression**: to understand individual variable effects.
+- **Random Forest Modeling**: to capture nonlinear interactions and feature importance.
+- **Audience Text Analysis**: exploring word frequency, genre-specific vocabulary (TF-IDF), and sentiment analysis.
+
+---
+
+# Website Structure
+
+- [**Model Results**](models.html):  
+  Explore how movie credits and sentiment scores predict box office revenue.  
+  Includes comparisons of models with and without sentiment data, feature importance, and model diagnostics.
+
+- [**Text Analysis**](text.html):  
+  Dive into audience reviews!  
+  Interactive visualizations reveal top words, distinctive vocabulary by genre, and average sentiment differences.
+
+You can also **download the full PDF report** with detailed tables, model summaries, and comprehensive discussions [here](https://dennis-ding1.github.io/movie-success-analysis/Final_Report.pdf).
+
+**Watch the 5-minute Demo Video**: [Click here to watch the project demo](https://drive.google.com/file/d/your-video-link/view?usp=sharing).
+
+
+---
+
+# Key Highlights
+
+- **Budget** is the most influential factor for box office success, but with diminishing returns as budgets grow.
+- **Audience ratings** (IMDB and TMDB) moderately correlate with revenue.
+- **Genre** effects are complex and often interact with other variables.
+- **Audience sentiment** varies meaningfully across genres but does **not significantly improve** revenue prediction models.
+
+---
+
+# Credits
+
+Created by **Haochen Ding**  
+Full code and resources available on [GitHub](https://github.com/Dennis-Ding1/movie-success-analysis).
+

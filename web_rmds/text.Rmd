@@ -1,6 +1,9 @@
 ---
 title: "The Impact of Credits, Revenue, and Audience Perception"
 subtitle: "Top Words in Reviews"
+output:
+  html_document:
+    toc: false 
 ---
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
@@ -129,7 +132,7 @@ tfidf_words <- word_counts %>%
 
 ```
 
-# 1. Anaysis {.tabset}
+# {.tabset}
 
 ## Top words
 
@@ -144,9 +147,6 @@ This interactive dual-panel visualization displays the top 10 words used in movi
 Hover over each bar to view the exact word frequency or TF-IDF score. This comparison helps reveal not only what audiences talk about most often, but also what language is most distinctive to each genre.
 
 ```{r interactive_text_final, echo=FALSE, message=FALSE, warning=FALSE}
-library(dplyr)
-library(plotly)
-
 genres <- sort(unique(word_counts$first_genre))
 top_n <- 10
 genre_default <- "Action"
@@ -241,18 +241,23 @@ cat('
 ```
 
 <div style="margin-top: 1em; font-size: 0.95em; color: #555;">
-<strong>Figure:</strong> Each panel shows a horizontal bar chart of the top 10 words in movie reviews for the selected genre. The left chart ranks by raw frequency, while the right highlights words with the highest TF-IDF scores—indicating terms uniquely important to that genre.
+<strong>Figure 1:</strong> Each panel shows a horizontal bar chart of the top 10 words in movie reviews for the selected genre. The left chart ranks by raw frequency, while the right highlights words with the highest TF-IDF scores—indicating terms uniquely important to that genre.
 </div>
 
-## Sentiment
+### Insights
+
+- High-frequency and high-TF-IDF words clearly align with the defining themes, characters, and elements of each genre (e.g., "spaceship" for Sci-Fi, "romance" for Romance).
+
+- TF-IDF terms often capture names of iconic characters, emotional moments, or genre-defining settings, showing how audiences connect to movies on deeper levels.
+
+
+
+
+## Sentiment Score
 
 ### Word Usage in Movie Reviews by Genre
 
 This interactive visualization shows how movie genres differ in the emotions they evoke from audiences. 
-
-- Genres like Family, Comedy, and Animation top the list with the highest average sentiment scores, reflecting more positive viewer experiences. 
-
-- In contrast, genres such as Crime and War tend to score lower.
 
 Hover over each bar to see the exact average sentiment score by genre.
 
@@ -284,14 +289,13 @@ plot_ly(
 ```
 
 <div style="margin-top: 1em; font-size: 0.95em; color: #555;">
-<strong>Figure:</strong> Interactive bar chart of average audience sentiment across movie genres. Bars are sorted by average sentiment score, providing a quick visual comparison of how positively different genres are perceived.
+<strong>Figure 2:</strong> Interactive bar chart of average audience sentiment across movie genres. Bars are sorted by average sentiment score, providing a quick visual comparison of how positively different genres are perceived.
 </div>
 
+### Insights
 
-# 2. Key Insights
+- Genres like Family, Comedy, and Animation top the list with the highest average sentiment scores, reflecting more positive viewer experiences. 
 
-- Audience reviews reveal rich genre-specific language, from emotional tones to iconic keywords — showcasing how viewers engage with films through both sentiment and story.
+- In contrast, genres such as Crime and War tend to score lower.
 
-- Family, Comedy, and Animation genres spark the most positive emotions, while darker genres like Crime and Horror trend negative — yet sentiment scores don’t significantly boost prediction accuracy.
 
-- The full report (PDF) reveals deeper insights, including the dominant role of budget, nonlinear effects, and how genre interacts with production scale to influence box office revenue.

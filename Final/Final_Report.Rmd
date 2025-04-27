@@ -422,11 +422,40 @@ ggplot(influence_data, aes(x = leverage, y = .std.resid)) +
 Figure 3, the Residuals vs Fitted plot shows a generally random scatter around the horizontal line at zero, suggesting that the assumptions of linearity and homoscedasticity are reasonably met. However, some funneling on the left indicates potential mild heteroskedasticity in lower fitted values. Figure 4, the Q-Q plot reveals notable deviations from the theoretical line, particularly in the lower tail, indicating some departure from normality in the residuals. Figure 5, the Residuals vs Leverage plot highlights one high-leverage observation with a large Cook's distance, suggesting that a single point may exert undue influence on the model. Overall, while the model appears broadly valid, these diagnostics suggest cautious interpretation and the possible need for robustness checks or alternative modeling approaches.
 
 ```{r echo=FALSE}
+var_labels <- c(
+  "(Intercept)" = "Intercept",
+  "budget" = "Budget",
+  "I(budget^2)" = "Budget Squared",
+  "num_production_companies" = "Number of Production Companies",
+  "num_cast" = "Number of Cast Members",
+  "num_production_countries" = "Number of Production Countries",
+  "num_genre" = "Number of Genres",
+  "tmdb_rating" = "TMDB Rating",
+  "imdb_rating" = "IMDB Rating",
+  "first_genreAdventure" = "Genre: Adventure",
+  "first_genreAnimation" = "Genre: Animation",
+  "first_genreComedy" = "Genre: Comedy",
+  "first_genreCrime" = "Genre: Crime",
+  "first_genreDrama" = "Genre: Drama",
+  "first_genreFamily" = "Genre: Family",
+  "first_genreFantasy" = "Genre: Fantasy",
+  "first_genreHistory" = "Genre: History",
+  "first_genreHorror" = "Genre: Horror",
+  "first_genreMusic" = "Genre: Music",
+  "first_genreMystery" = "Genre: Mystery",
+  "first_genreRomance" = "Genre: Romance",
+  "first_genreScience Fiction" = "Genre: Science Fiction",
+  "first_genreThriller" = "Genre: Thriller",
+  "first_genreWar" = "Genre: War",
+  "first_genreWestern" = "Genre: Western"
+)
+
 reg_table <- tidy(model) %>%
   dplyr::select(term, estimate, std.error, statistic, p.value) %>%
   mutate(significance = ifelse(p.value < 0.001, "very significant", 
                           ifelse(p.value < 0.01, "significant", "not significant"))) |> 
   mutate(
+    term = ifelse(term %in% names(var_labels), var_labels[term], term),
     estimate = formatC(estimate, format = "e", digits = 2),
     std.error = formatC(std.error, format = "e", digits = 2),
     statistic = round(statistic, 3),

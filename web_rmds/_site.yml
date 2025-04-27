@@ -7,7 +7,7 @@ navbar:
       href: index.html
     - text: Model Results
       href: models.html
-    - text: Text Analysis
+    - text: Text Analysis 
       href: text.html
     - text: "⬇ PDF Report"
       href: https://github.com/Dennis-Ding1/movie-success-analysis/blob/main/Final/Final_Report.pdf

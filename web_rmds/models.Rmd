@@ -1,6 +1,9 @@
 ---
 title: "The Impact of Credits, Revenue, and Audience Perception"
 subtitle: "Box office Modeling"
+output:
+  html_document:
+    toc: false 
 ---
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
@@ -24,6 +27,7 @@ library(textdata)
 library(ggcorrplot)
 library(patchwork)
 library(htmltools)
+library(DT)
 ```
 
 ```{r, include=FALSE}
@@ -129,21 +133,206 @@ tfidf_words <- word_counts %>%
 
 ```
 
-# 1. Anaysis {.tabset}
+# {.tabset}
 
-## Revenue
+## Regression
+
+### Coefficient Table
+
+This table presents the results of a multiple linear regression predicting log box office revenue based on key movie features
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+model <- lm(log_revenue ~ budget + I(budget^2) + num_production_companies + num_cast +  num_production_countries + num_genre + tmdb_rating + imdb_rating + first_genre, data = movies_cleaned_box)
+
+var_labels <- c(
+  "(Intercept)" = "Intercept",
+  "budget" = "Budget",
+  "I(budget^2)" = "Budget Squared",
+  "num_production_companies" = "Number of Production Companies",
+  "num_cast" = "Number of Cast Members",
+  "num_production_countries" = "Number of Production Countries",
+  "num_genre" = "Number of Genres",
+  "tmdb_rating" = "TMDB Rating",
+  "imdb_rating" = "IMDB Rating",
+  "first_genreAdventure" = "Genre: Adventure",
+  "first_genreAnimation" = "Genre: Animation",
+  "first_genreComedy" = "Genre: Comedy",
+  "first_genreCrime" = "Genre: Crime",
+  "first_genreDrama" = "Genre: Drama",
+  "first_genreFamily" = "Genre: Family",
+  "first_genreFantasy" = "Genre: Fantasy",
+  "first_genreHistory" = "Genre: History",
+  "first_genreHorror" = "Genre: Horror",
+  "first_genreMusic" = "Genre: Music",
+  "first_genreMystery" = "Genre: Mystery",
+  "first_genreRomance" = "Genre: Romance",
+  "first_genreScience Fiction" = "Genre: Science Fiction",
+  "first_genreThriller" = "Genre: Thriller",
+  "first_genreWar" = "Genre: War",
+  "first_genreWestern" = "Genre: Western"
+)
+
+reg_table <- broom::tidy(model) %>%
+  dplyr::select(term, estimate, std.error, statistic, p.value) %>%
+  mutate(
+    term = ifelse(term %in% names(var_labels), var_labels[term], term),
+    significance = ifelse(p.value < 0.001, "very significant", 
+                   ifelse(p.value < 0.01, "significant", "not significant")),
+    estimate = formatC(estimate, format = "e", digits = 2),
+    std.error = formatC(std.error, format = "e", digits = 2),
+    statistic = round(statistic, 3),
+    p.value = round(p.value, 3)
+  )
+
+datatable(
+  reg_table,
+  options = list(
+    pageLength = 10,
+    autoWidth = TRUE,
+    scrollX = TRUE,
+    columnDefs = list(
+      list(width = '200px', targets = 0),  # term column wider
+      list(width = '100px', targets = 1:4), # estimate, std.error, statistic, p.value
+      list(width = '150px', targets = 5)    # significance
+    )
+  ),
+  rownames = FALSE,
+  caption = htmltools::tags$caption(
+    style = 'caption-side: top; text-align: center; font-weight: bold;',
+    'Table: Regression Results'
+  )
+)
+```
+
+### Insights
+
+- Budget is the strongest and most significant predictor of revenue. Both budget and budget squared terms are highly significant, confirming a nonlinear relationship: increasing budgets boost revenue but with diminishing returns.
+
+- Audience ratings from IMDB and TMDB show a positive, significant association with revenue, suggesting that higher-rated movies tend to perform better at the box office.
+
+- Production companies (number involved) also have a notable effect, highlighting the role of production scale and marketing networks.
+
+- Genre effects are mixed. While some genres (e.g., Action, Adventure) show differences compared to the baseline, most genre variables are not statistically significant in this model — possibly due to imbalances in genre representation.
+
+
+
+
+
+## Random Forest
+
+### Variable Importance
+
+This plot compares feature importance from the random forest model.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+set.seed(370)
+train_index2 <- sample(1:nrow(movies_cleaned_box), 0.8 * nrow(movies_cleaned_box))
+train_data2 <- movies_cleaned_box[train_index2,]
+test_data2 <- movies_cleaned_box[-train_index2,]
+
+rf_model <- randomForest(revenue ~ budget + num_production_companies + num_cast +  num_production_countries + num_genre + tmdb_rating + imdb_rating + first_genre,
+                         data=train_data2, ntree=100, importance=TRUE)
+
+importance_df <- as.data.frame(importance(rf_model)) %>% 
+  tibble::rownames_to_column(var = "Feature") %>%
+  arrange(desc(`%IncMSE`))
+
+var_labels <- c(
+  num_cast = "Number of Casts",
+  num_genre = "Number of Genres",
+  num_production_companies = "Production Companies",
+  num_production_countries = "Production Countries",
+  budget = "Budget",
+  revenue = "Revenue",
+  imdb_rating = "IMDB Rating",
+  imdb_votes = "IMDB Votes",
+  tmdb_rating = "TMDB Rating",
+  vote_count = "TMDB Vote Count",
+  first_genre = "Main Genre"
+)
+
+importance_plot <- importance_df %>%
+  mutate(
+    Feature = ifelse(Feature %in% names(var_labels), var_labels[Feature], Feature)
+  )
+
+importance_plot$IncNodePurity <- as.numeric(importance_plot$IncNodePurity)
+
+# === Plot for %IncMSE ===
+plot_mse <- plot_ly(
+  data = importance_plot,
+  x = ~`%IncMSE`,
+  y = ~reorder(Feature, `%IncMSE`),
+  type = "bar",
+  orientation = "h",
+  marker = list(color = "steelblue"),
+  text = ~paste("Feature:", Feature, "<br>%IncMSE:", round(`%IncMSE`, 2)),
+  textposition = "none", 
+  hoverinfo = "text",
+  showlegend = FALSE
+)
+
+# === Plot for IncNodePurity ===
+plot_purity <- plot_ly(
+  data = importance_plot,
+  x = ~IncNodePurity,
+  y = ~reorder(Feature, IncNodePurity),
+  type = "bar",
+  orientation = "h",
+  marker = list(color = "darkorange"),
+  text = ~paste("Feature:", Feature, "<br>IncNodePurity:", round(IncNodePurity, 2)),
+  textposition = "none", 
+  hoverinfo = "text",
+  showlegend = FALSE
+)
+
+subplot(plot_mse, plot_purity, nrows = 1, shareY = FALSE, titleX = TRUE, titleY = FALSE) %>%
+  layout(
+    title = list(
+      text = "Random Forest Feature Importance Comparison",
+      x = 0.5,
+      xanchor = "center",
+      font = list(size = 20)
+    ),
+    xaxis = list(
+      title = list(text = "% Increase in MSE", standoff = 30),
+      domain = c(0, 0.45)
+    ),
+    xaxis2 = list(
+      title = list(text = "Increase in Node Purity", standoff = 30),
+      domain = c(0.55, 1)
+    ),
+    yaxis = list(title = "", anchor = "x"),
+    yaxis2 = list(title = "", anchor = "x2"),
+    margin = list(t = 60),
+    width = 800,
+    height = 450 
+  )
+
+```
+
+<div style="margin-top: 1em; font-size: 0.95em; color: #555;">
+<strong>Figure 1:</strong> Random Forest Feature Importance Comparison based on two metrics: Percentage Increase in MSE and Increase in Node Purity.
+</div>
+
+### Insights
+
+- Budget is by far the most important feature under both criteria, further confirming its dominant role in predicting movie success. But it has diminishing return.
+
+- Audience ratings (IMDB and TMDB) and main genre also contribute meaningfully, although to a lesser extent.
+
+- Cast size and number of production companies have moderate importance, suggesting that larger casts and production collaborations play supporting roles.
+
+- Production countries and number of genres have minimal predictive value compared to other features.
+
+
+
+
+## Model Comparison
 
 ### Box office Model Comparison: With vs Without Sentiment Score
 
-This interactive plot compares the predictive performance of two modeling approaches—**Linear Regression** and **Random Forest**—in estimating movie box office revenue. The layout consists of three side-by-side plots:
-
-- **Linear Model** (Full dataset): Fitted vs Actual revenue  
-- **Random Forest – Train Set**: Fitted vs Actual revenue  
-- **Random Forest – Test Set**: Predicted vs Actual revenue  
-
-All models are using budget, genre, rating, number of cast and production companies / countries.
-
-Despite expectations, including audience sentiment did not noticeably improve model accuracy, suggesting that sentiment scores may not provide additional predictive value in this context.
+This interactive plot compares the predictive performance of two modeling approaches—**Linear Regression** and **Random Forest**—in estimating movie box office revenue.
 
 A toggle button above the plots allows you to switch between models that include **audience sentiment scores** as a feature and those that do not.
 
@@ -246,103 +435,13 @@ full_plot
 ```
 
 <div style="margin-top: 1em; font-size: 0.95em; color: #555;">
-<strong>Figure:</strong> Each panel displays an interactive scatter plot with a dashed 45° reference line indicating perfect prediction. Points closer to the diagonal suggest better model performance. This visual comparison helps assess whether including sentiment information improves prediction quality.
+<strong>Figure 2:</strong> Each panel displays an interactive scatter plot with a dashed 45° reference line indicating perfect prediction. Points closer to the diagonal suggest better model performance. This visual comparison helps assess whether including sentiment information improves prediction quality.
 </div>
 
-## Importance
+### Insights
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-set.seed(370)
-train_index <- sample(1:nrow(movies_cleaned_box), 0.8 * nrow(movies_cleaned_box))
-train_data <- movies_cleaned_box[train_index,]
-test_data <- movies_cleaned_box[-train_index,]
+- Random Forest models consistently outperform linear regression, capturing complex relationships between features and revenue.
 
-rf_model <- randomForest(revenue ~ budget + num_production_companies + num_cast +  num_production_countries + num_genre + tmdb_rating + imdb_rating + first_genre,
-                         data=train_data, ntree=100, importance=TRUE)
+- Adding sentiment scores provides minimal improvement. The model without sentiment performs similarly to the one with sentiment, suggesting that sentiment does not add significant predictive power beyond existing features like budget, ratings, and genre.
 
-importance_df <- as.data.frame(importance(rf_model)) %>% 
-  tibble::rownames_to_column(var = "Feature") %>%
-  arrange(desc(`%IncMSE`))
-
-var_labels <- c(
-  num_cast = "Number of Casts",
-  num_genre = "Number of Genres",
-  num_production_companies = "Production Companies",
-  num_production_countries = "Production Countries",
-  budget = "Budget",
-  revenue = "Revenue",
-  imdb_rating = "IMDB Rating",
-  imdb_votes = "IMDB Votes",
-  tmdb_rating = "TMDB Rating",
-  vote_count = "TMDB Vote Count",
-  first_genre = "Main Genre"
-)
-
-importance_plot <- importance_df %>%
-  mutate(
-    Feature = ifelse(Feature %in% names(var_labels), var_labels[Feature], Feature)
-  )
-
-importance_plot$IncNodePurity <- as.numeric(importance_plot$IncNodePurity)
-
-# === Plot for %IncMSE ===
-plot_mse <- plot_ly(
-  data = importance_plot,
-  x = ~`%IncMSE`,
-  y = ~reorder(Feature, `%IncMSE`),
-  type = "bar",
-  orientation = "h",
-  marker = list(color = "steelblue"),
-  text = ~paste("Feature:", Feature, "<br>%IncMSE:", round(`%IncMSE`, 2)),
-  textposition = "none", 
-  hoverinfo = "text",
-  showlegend = FALSE
-)
-
-# === Plot for IncNodePurity ===
-plot_purity <- plot_ly(
-  data = importance_plot,
-  x = ~IncNodePurity,
-  y = ~reorder(Feature, IncNodePurity),
-  type = "bar",
-  orientation = "h",
-  marker = list(color = "darkorange"),
-  text = ~paste("Feature:", Feature, "<br>IncNodePurity:", round(IncNodePurity, 2)),
-  textposition = "none", 
-  hoverinfo = "text",
-  showlegend = FALSE
-)
-
-subplot(plot_mse, plot_purity, nrows = 1, shareY = FALSE, titleX = TRUE, titleY = FALSE) %>%
-  layout(
-    title = list(
-      text = "Random Forest Feature Importance Comparison",
-      x = 0.5,
-      xanchor = "center",
-      font = list(size = 20)
-    ),
-    xaxis = list(
-      title = list(text = "% Increase in MSE", standoff = 30),
-      domain = c(0, 0.45)
-    ),
-    xaxis2 = list(
-      title = list(text = "Increase in Node Purity", standoff = 30),
-      domain = c(0.55, 1)
-    ),
-    yaxis = list(title = "", anchor = "x"),
-    yaxis2 = list(title = "", anchor = "x2"),
-    margin = list(t = 60),
-    width = 800,
-    height = 450 
-  )
-
-```
-
-
-# 2. Key Insights
-
-- Audience reviews reveal rich genre-specific language, from emotional tones to iconic keywords — showcasing how viewers engage with films through both sentiment and story.
-
-- Family, Comedy, and Animation genres spark the most positive emotions, while darker genres like Crime and Horror trend negative — yet sentiment scores don’t significantly boost prediction accuracy.
-
-- The full report (PDF) reveals deeper insights, including the dominant role of budget, nonlinear effects, and how genre interacts with production scale to influence box office revenue.
+- This highlights that while audience emotions are interesting qualitatively, they may not be strong standalone predictors of financial success in a structured model.
