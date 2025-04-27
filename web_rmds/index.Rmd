@@ -1,0 +1,11 @@
+---
+title: "Movie Success Analysis"
+output: html_document
+---
+
+# Welcome
+
+Explore the project:
+
+- [Model Results](models.html)
+- [Text Analysis](text.html)

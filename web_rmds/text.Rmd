@@ -1,0 +1,297 @@
+---
+title: "The Impact of Credits, Revenue, and Audience Perception"
+subtitle: "Top Words in Reviews"
+---
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+library(httr)
+library(jsonlite)
+library(plotly)
+library(dplyr)
+library(tidyverse)
+library(tidytext)
+library(ggplot2)
+library(knitr)
+library(kableExtra)
+library(car) 
+library(MASS)
+library(lubridate)
+library(randomForest)
+library(gridExtra)
+library(broom)
+library(tm)
+library(textdata)
+library(ggcorrplot)
+library(patchwork)
+library(htmltools)
+```
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(toc.depth = 1)
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+movie_genres <- read.csv("data/movie_genres.csv")
+
+reviews <- read.csv("data/reviews.csv")
+
+movies <- read.csv("data/movies_full.csv")
+
+movies <- movies %>%
+  rename(tmdb_rating = vote_average)
+
+movies <- movies %>%
+  mutate(
+    num_production_companies = str_count(production_companies, ", ") + 1,
+    num_cast = str_count(cast, ", ") + 1,
+    num_genre = str_count(genre_ids, ", ") + 1,
+    num_production_countries = str_count(production_countries, ", ") + 1,
+    first_genre = sapply(strsplit(as.character(genre_ids), ",\\s*"), `[`, 1)
+  )
+
+movies <- movies %>%
+  mutate(first_genre = as.integer(first_genre)) %>%
+  left_join(movie_genres, by = c("first_genre" = "id")) %>%
+  mutate(first_genre = name) %>%
+  dplyr::select(-name)
+
+movies_cleaned_box <- movies %>%
+  filter(!is.na(revenue) & !is.na(budget) & revenue > 100 & budget > 100)
+
+movies_cleaned_box$log_revenue <- log(movies_cleaned_box$revenue)
+
+reviews_clean <- reviews %>%
+  filter(!is.na(content))
+
+clean_text <- function(text) {
+  text <- iconv(text, from = "UTF-8", to = "UTF-8", sub = "")
+  text <- tolower(text)                
+  text <- gsub("[^a-z'\\s]", " ", text)        
+  text <- removeWords(text, stopwords("en"))   
+  text <- stripWhitespace(text)             
+  return(text)
+}
+
+reviews_clean <- reviews_clean %>%
+  mutate(review = map_chr(content, clean_text)) |> 
+  dplyr::select(review, movie_id)
+
+reviews_clean <- reviews_clean %>%
+  filter(str_trim(review) != "")
+
+
+
+afinn_lex <- get_sentiments("afinn")
+
+review_sentiment <- reviews_clean %>%
+  mutate(review_id = row_number()) %>%
+  unnest_tokens(word, review) %>%
+  inner_join(afinn_lex, by = "word") %>%
+  group_by(review_id, movie_id) %>%
+  summarise(sentiment_score = mean(value), .groups = "drop")
+
+movie_sentiment <- review_sentiment %>%
+  group_by(movie_id) %>%
+  summarise(avg_sentiment = mean(sentiment_score), .groups = "drop")
+
+movie_sentiment_full <- movie_sentiment %>%
+  inner_join(movies_cleaned_box, by = c("movie_id" = "id"))
+
+
+model1 <- lm(log_revenue ~ budget + I(budget^2) + num_production_companies + num_cast +  num_production_countries + num_genre + tmdb_rating + imdb_rating + first_genre, data = movie_sentiment_full)
+
+model2 <- lm(log_revenue ~ budget + I(budget^2) + num_production_companies + num_cast +  num_production_countries + num_genre + tmdb_rating + imdb_rating + first_genre + avg_sentiment, data = movie_sentiment_full)
+
+set.seed(370)
+train_index <- sample(1:nrow(movie_sentiment_full), 0.8 * nrow(movie_sentiment_full))
+train_data <- movie_sentiment_full[train_index,]
+test_data <- movie_sentiment_full[-train_index,]
+
+rf_model1 <- randomForest(revenue ~ budget + num_production_companies + num_cast +  num_production_countries + num_genre + tmdb_rating + imdb_rating + first_genre,
+                         data=train_data, ntree=100, importance=TRUE)
+rf_model2 <- randomForest(revenue ~ budget + num_production_companies + num_cast +  num_production_countries + num_genre + tmdb_rating + imdb_rating + first_genre + avg_sentiment,
+                         data=train_data, ntree=100, importance=TRUE)
+
+custom_stopwords <- c("s", "t", "m", "ll", "ve", "re", "em", "d", "movie", "film", "films", "one", "two", "even", "just", "well", "also", "good", "will", "really", "sci", "fi", "can", "much", "oz", "ian")
+
+reviews_genre <- reviews_clean %>%
+  inner_join(movies_cleaned_box, by = c("movie_id" = "id"))
+  
+word_counts <- reviews_genre %>%
+  unnest_tokens(word, review) %>%
+  filter(!word %in% custom_stopwords) %>%
+  count(first_genre, word, sort = TRUE)
+
+tfidf_words <- word_counts %>%
+  filter(n >= 5) |> 
+  bind_tf_idf(word, first_genre, n) %>%
+  arrange(desc(tf_idf))
+
+```
+
+# 1. Anaysis {.tabset}
+
+## Top words
+
+### Top Words in Reviews by Genre
+
+This interactive dual-panel visualization displays the top 10 words used in movie reviews across different genres. Use the dropdown menu to explore specific genres.
+
+- **Left panel** shows the most frequently used words in reviews for the selected genre.
+
+- **Right panel** highlights the top TF-IDF (Term Frequency–Inverse Document Frequency) words—terms that are uniquely representative of the genre.
+
+Hover over each bar to view the exact word frequency or TF-IDF score. This comparison helps reveal not only what audiences talk about most often, but also what language is most distinctive to each genre.
+
+```{r interactive_text_final, echo=FALSE, message=FALSE, warning=FALSE}
+library(dplyr)
+library(plotly)
+
+genres <- sort(unique(word_counts$first_genre))
+top_n <- 10
+genre_default <- "Action"
+
+generate_subplot <- function(genre) {
+  freq_data <- word_counts %>%
+    filter(first_genre == genre) %>%
+    slice_max(n, n = top_n, with_ties = FALSE) %>%
+    arrange(desc(n))
+
+  tfidf_data <- tfidf_words %>%
+    filter(first_genre == genre) %>%
+    slice_max(tf_idf, n = top_n, with_ties = FALSE) %>%
+    arrange(desc(tf_idf))
+
+  freq_plot <- plot_ly(freq_data,
+                       x = ~n, y = ~reorder(word, n),
+                       type = 'bar', orientation = 'h',
+                       name = "Word Frequency",
+                       text = ~paste("Word:", word, "<br>Frequency:", n),
+                       hoverinfo = 'text',
+                       textposition = "none", 
+                       marker = list(color = "#1f77b4"),
+                       showlegend = FALSE) %>%
+    layout(xaxis = list(title = "Word Frequency"),
+           yaxis = list(title = ""))
+
+  tfidf_plot <- plot_ly(tfidf_data,
+                        x = ~tf_idf, y = ~reorder(word, tf_idf),
+                        type = 'bar', orientation = 'h',
+                        name = "TF-IDF",
+                        text = ~paste("Word:", word, "<br>TF-IDF:", round(tf_idf, 4)),
+                        hoverinfo = 'text',
+                        textposition = "none", 
+                        marker = list(color = "#ff7f0e"),
+                        showlegend = FALSE) %>%
+    layout(xaxis = list(title = "TF-IDF Score"),
+           yaxis = list(title = ""))
+
+  subplot(freq_plot, tfidf_plot, nrows = 1, shareY = FALSE, titleX = TRUE, titleY = FALSE) %>%
+    layout(
+      title = list(
+        text = "Top 10 Most Frequent and Distinctive Words in Reviews by Genre",
+        x = 0.5,
+        xanchor = "center",
+        font = list(size = 20)
+      ),
+      xaxis = list(
+        title = list(text = "Word Frequency", standoff = 30),
+        domain = c(0, 0.45)
+      ),
+      xaxis2 = list(
+        title = list(text = "TF-IDF Score", standoff = 30),
+        domain = c(0.55, 1)
+      ),
+      yaxis = list(title = "", anchor = "x"),
+      yaxis2 = list(title = "", anchor = "x2"),
+      margin = list(t = 30)
+    )
+}
+
+plots <- list()
+for (g in genres) {
+  id <- paste0("plot_", g)
+  plot_html <- as.tags(generate_subplot(g))
+  style <- if (g == "Action") "" else "display:none"
+  plots[[g]] <- tags$div(id = id, style = style, plot_html)
+}
+
+
+```
+
+```{r echo=FALSE, results='asis'}
+cat('<select id="genreDropdown" style="margin-bottom: 1em; font-size: 16px;">')
+for (g in genres) {
+  cat(sprintf('<option value="%s">%s</option>', g, g))
+}
+cat('</select>')
+
+browsable(tagList(plots))
+
+cat('
+<script>
+  document.getElementById("genreDropdown").addEventListener("change", function() {
+    const selected = this.value;
+    document.querySelectorAll("div[id^=\'plot_\']").forEach(div => div.style.display = "none");
+    document.getElementById("plot_" + selected).style.display = "";
+  });
+</script>
+<div style="margin-bottom: 30px;"></div>
+')
+```
+
+<div style="margin-top: 1em; font-size: 0.95em; color: #555;">
+<strong>Figure:</strong> Each panel shows a horizontal bar chart of the top 10 words in movie reviews for the selected genre. The left chart ranks by raw frequency, while the right highlights words with the highest TF-IDF scores—indicating terms uniquely important to that genre.
+</div>
+
+## Sentiment
+
+### Word Usage in Movie Reviews by Genre
+
+This interactive visualization shows how movie genres differ in the emotions they evoke from audiences. 
+
+- Genres like Family, Comedy, and Animation top the list with the highest average sentiment scores, reflecting more positive viewer experiences. 
+
+- In contrast, genres such as Crime and War tend to score lower.
+
+Hover over each bar to see the exact average sentiment score by genre.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+sentiment_summary <- movie_sentiment_full %>%
+  group_by(first_genre) %>%
+  summarise(mean_sentiment = mean(avg_sentiment, na.rm = TRUE), .groups = "drop") %>%
+  arrange(mean_sentiment)  # ensures descending visual order after coord_flip
+
+plot_ly(
+  data = sentiment_summary,
+  x = ~mean_sentiment,
+  y = ~reorder(first_genre, mean_sentiment),
+  type = "bar",
+  orientation = "h",
+  text = ~paste("Genre:", first_genre, "<br>Average Sentiment:", round(mean_sentiment, 3)),
+  hoverinfo = "text",
+  textposition = "none", 
+  marker = list(color = "steelblue")
+) %>%
+  layout(
+    title = "Average Audience Sentiment by Genre",
+    xaxis = list(title = "Average Sentiment"),
+    yaxis = list(title = "Genre"),
+    margin = list(l = 100, t =50),
+    template = "plotly_white"
+  )
+
+```
+
+<div style="margin-top: 1em; font-size: 0.95em; color: #555;">
+<strong>Figure:</strong> Interactive bar chart of average audience sentiment across movie genres. Bars are sorted by average sentiment score, providing a quick visual comparison of how positively different genres are perceived.
+</div>
+
+
+# 2. Key Insights
+
+- Audience reviews reveal rich genre-specific language, from emotional tones to iconic keywords — showcasing how viewers engage with films through both sentiment and story.
+
+- Family, Comedy, and Animation genres spark the most positive emotions, while darker genres like Crime and Horror trend negative — yet sentiment scores don’t significantly boost prediction accuracy.
+
+- The full report (PDF) reveals deeper insights, including the dominant role of budget, nonlinear effects, and how genre interacts with production scale to influence box office revenue.

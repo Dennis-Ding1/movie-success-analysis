@@ -1,0 +1,22 @@
+name: "movie-success-analsis"
+output_dir: docs
+navbar:
+  title: "🎬 Movie Success Analysis"
+  left:
+    - text: Home
+      href: index.html
+    - text: Model Results
+      href: models.html
+    - text: Text Analysis
+      href: text.html
+    - text: "⬇ PDF Report"
+      href: https://github.com/Dennis-Ding1/movie-success-analysis/blob/main/Final/Final_Report.pdf
+
+output:
+  html_document:
+    theme: flatly
+    highlight: textmate
+    toc: true
+    toc_depth: 1
+    toc_float: true
+    css: custom.css
