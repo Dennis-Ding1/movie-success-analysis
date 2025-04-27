@@ -40,7 +40,7 @@ Our methodology combines:
 
 You can also **download the full PDF report** with detailed tables, model summaries, and comprehensive discussions [here](https://dennis-ding1.github.io/movie-success-analysis/Final_Report.pdf).
 
-**Watch the 5-minute Demo Video**: [Click here to watch the project demo](https://drive.google.com/file/d/your-video-link/view?usp=sharing).
+**Watch the 5-minute Demo Video**: [Click here to watch the project demo](https://youtu.be/gtZV-0I0rvI).
 
 
 ---
